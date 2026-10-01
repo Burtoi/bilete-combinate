@@ -4,6 +4,8 @@ Manager de bilete de pariuri: îți ții selecțiile, le grupezi automat în bil
 și vezi profitul, ROI-ul și, în **Test control**, dacă rezultatele tale sunt mai bune decât ce ar fi dat doar norocul.
 Un singur fișier HTML: merge **offline**, pe **PC și pe telefon**, fără cont și fără server. Datele rămân în browserul tău.
 
+**Aplicația online (link permanent):** https://burtoi.github.io/bilete-combinate/
+
 ![Bilet](docs/bilet.png)
 
 | | |
@@ -49,7 +51,7 @@ obține probabilitatea „corectă” de câștig a fiecărei selecții: `p = 1 
 
 ## Pe telefon
 
-Deschide linkul în Chrome și alege **⋮ → Adaugă pe ecranul principal / Instalează aplicația**. Funcționează apoi și fără internet.
+Deschide https://burtoi.github.io/bilete-combinate/ în Chrome și alege **⋮ → Adaugă pe ecranul principal / Instalează aplicația**. Funcționează apoi și fără internet.
 Fișierul `bilete-combinate.html` poate fi deschis și direct, de pe disc.
 
 ## Date și confidențialitate
