@@ -1,0 +1,1700 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0f1d">
+<meta name="color-scheme" content="dark">
+<title>Bilete combinate · manager de bilete, jurnal și ROI</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f5a524'/%3E%3Cpath d='M14 22h36v6a4 4 0 0 0 0 8v6H14v-6a4 4 0 0 0 0-8z' fill='%231a1100'/%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#0a0f1d; --bg2:#0e1528; --card:#111a31; --card2:#16223f; --line:#212d4f; --line2:#2d3b66;
+  --text:#e8ecf8; --muted:#8e9bbb; --faint:#5f6c8f;
+  --amber:#f5a524; --amber2:#fbbf24; --green:#22c55e; --green2:#34d399; --red:#f87171; --blue:#60a5fa; --purple:#a78bfa;
+  --radius:12px; --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:radial-gradient(900px 500px at 85% -10%,#18254d55,transparent 60%),var(--bg);color:var(--text);
+  font:14.5px/1.45 var(--font);min-height:100vh;-webkit-font-smoothing:antialiased}
+.hidden{display:none!important}
+.muted{color:var(--muted)} .faint{color:var(--faint)} .small{font-size:12.5px}
+b,strong{font-weight:650}
+h2,h3,h4{margin:0 0 8px;line-height:1.25}
+h3{font-size:17px} h4{font-size:14px}
+a{color:var(--blue)}
+.wrap{max-width:1240px;margin:0 auto;padding:0 16px}
+
+/* ---------- antet + file ---------- */
+.top{border-bottom:1px solid var(--line);background:#0b1224e6}
+.top-in{display:flex;align-items:center;gap:12px;min-height:56px;padding-top:8px;padding-bottom:8px}
+.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.brand svg{flex:none}
+.brand b{display:block;font-size:17px;line-height:1.15}
+.brand small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{background:#121b33;border:1px solid var(--line2);color:var(--text);width:38px;height:38px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}
+.icon-btn:hover{background:#1a2644} .icon-btn:disabled{opacity:.35;cursor:not-allowed}
+.ic{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tabs{display:flex;gap:8px;padding:12px 0 4px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:#121b33;color:var(--text);border:1px solid var(--line2);padding:8px 16px;border-radius:10px;font:600 14px var(--font);cursor:pointer;white-space:nowrap;display:inline-flex;gap:8px;align-items:center}
+.tab:hover{background:#1a2644}
+.tab.active{background:var(--amber);color:#1a1100;border-color:var(--amber)}
+.tab .sh{display:none}
+.hint-box{margin:2px 0 8px}
+.hint-box>summary{cursor:pointer;color:var(--muted);font-size:12.5px;list-style:none}
+.hint-box>summary::-webkit-details-marker{display:none}
+.hint-box>summary::before{content:'ⓘ ';color:var(--amber)}
+.th-main .m::before{content:'· '}
+.tab .n{font-size:11.5px;background:#ffffff1c;border-radius:999px;padding:0 7px;line-height:18px}
+.tab.active .n{background:#00000026}
+main{padding-top:12px;padding-bottom:70px}
+
+/* ---------- componente ---------- */
+.card{background:linear-gradient(180deg,var(--card),#0f1830);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px}
+details.card>summary{cursor:pointer;font-weight:650;list-style:none;display:flex;align-items:center;gap:8px;color:var(--amber2)}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary::before{content:"▸";transition:.15s;color:var(--amber)}
+details.card[open]>summary::before{transform:rotate(90deg)}
+details.card[open]>summary{margin-bottom:10px}
+.sec-title{color:var(--amber);font-weight:700;letter-spacing:.6px;font-size:13px;margin-bottom:10px}
+.btn{font:600 13.5px var(--font);color:var(--text);background:#18244a;border:1px solid var(--line2);border-radius:9px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#21305f} .btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.primary{background:var(--amber);border-color:var(--amber);color:#1a1100}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent}
+.btn.danger{border-color:#7f2a2a;color:#fecaca;background:#2a1216}
+.btn.small{padding:5px 10px;font-size:12.5px;border-radius:8px}
+input,select,textarea{background:#0a1226;border:1px solid var(--line2);color:var(--text);border-radius:8px;padding:8px 10px;font:14px var(--font);min-width:0}
+input:focus,select:focus,textarea:focus{outline:2px solid #f5a52455;border-color:var(--amber)}
+input::placeholder,textarea::placeholder{color:var(--faint)}
+textarea{width:100%;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px}
+label{color:var(--muted);font-size:12.5px;display:flex;flex-direction:column;gap:4px}
+label.inline{flex-direction:row;align-items:center;gap:8px}
+.check{display:inline-flex;flex-direction:row;align-items:center;gap:8px;color:var(--muted);font-size:13px;cursor:pointer}
+.check input{width:16px;height:16px;accent-color:var(--amber);padding:0}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row.end{justify-content:flex-end}
+.grow{flex:1;min-width:140px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;align-items:end}
+.form-grid .wide{grid-column:span 2}
+.form-actions{display:flex;align-items:end}
+.controls{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:10px}
+.controls input{width:84px} .controls select{min-width:210px}
+.hint{color:var(--muted);font-size:12.5px;margin:6px 0 8px}
+.summary{font-size:13px;color:var(--muted);line-height:1.7}
+.summary b{color:var(--text)} .g{color:var(--green2)} .r{color:var(--red)}
+.sep{color:var(--faint);margin:0 4px}
+.badge{display:inline-block;border:1px solid var(--line2);border-radius:999px;padding:0 8px;font-size:11.5px;line-height:19px;color:var(--muted)}
+.badge.warn{border-color:#8a6a1c;color:var(--amber2);background:#2a1f08}
+.banner{border:1px solid var(--line2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.banner.warn{border-color:#8a6a1c;background:#2a1f08;color:#fde68a}
+.banner.info{border-color:#27508f;background:#0f1d3a;color:#bcd4ff}
+.banner .btn{margin-left:auto}
+.empty{text-align:center;padding:34px 16px;color:var(--muted)}
+.empty b{display:block;color:var(--text);font-size:15px;margin-bottom:4px}
+
+/* ---------- tabele ---------- */
+.tbl{display:flex;flex-direction:column}
+.tr{display:grid;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid #16213f}
+.tr:last-child{border-bottom:0}
+.tr:hover{background:#ffffff06}
+.th{font-size:11.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--line)}
+.th:hover{background:none}
+.leg,.th.leg{grid-template-columns:52px 54px minmax(160px,2.2fr) minmax(120px,1.5fr) 54px 74px 90px 190px 34px}
+.pick,.th.pick{grid-template-columns:26px 86px 52px minmax(160px,2fr) minmax(110px,1.4fr) 54px 74px 88px 118px 56px 66px}
+.c-time{grid-column:1}.c-code{grid-column:2}.c-match{grid-column:3}.c-league{grid-column:4}.c-mod{grid-column:5}.c-mkt{grid-column:6}.c-odds{grid-column:7}.c-res{grid-column:8}.c-x{grid-column:9}
+.pick .c-chk{grid-column:1}.pick .c-when{grid-column:2}.pick .c-code{grid-column:3}.pick .c-match{grid-column:4}.pick .c-league{grid-column:5}.pick .c-mod{grid-column:6}.pick .c-mkt{grid-column:7}.pick .c-odds{grid-column:8}.pick .c-res{grid-column:9}.pick .c-tk{grid-column:10}.pick .c-act{grid-column:11}
+.tr>*{grid-row:1;min-width:0}
+.meta{display:contents}
+.c-time,.c-when{color:var(--muted);font-size:13px}
+.c-code{color:var(--muted);font-variant-numeric:tabular-nums}
+.c-match{font-weight:600;overflow-wrap:anywhere}
+.c-league{color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
+.mod,.mkt{display:inline-block;border-radius:999px;padding:1px 9px;font-size:11.5px;font-weight:700;line-height:19px;border:1px solid}
+.mod{color:hsl(var(--h) 85% 68%);border-color:hsl(var(--h) 60% 38%);background:hsl(var(--h) 55% 16%)}
+.mkt{color:var(--amber2);border-color:#7a5a14;background:#2a1f08}
+.odds{width:100%;text-align:right;font-weight:650}
+.odds.bad{border-color:var(--red)}
+.c-res{display:flex;gap:4px;flex-wrap:nowrap}
+.rb{font:700 10.5px var(--font);letter-spacing:.3px;border-radius:6px;border:1px solid var(--line2);background:#0d1630;color:var(--muted);padding:5px 7px;cursor:pointer;line-height:1}
+.rb:hover{color:var(--text);border-color:#4a5d94}
+.rb.win.on{background:#15803d;border-color:#22c55e;color:#eafff1}
+.rb.loss.on{background:#991b1b;border-color:#f87171;color:#fff0f0}
+.rb.void.on{background:#475569;border-color:#94a3b8;color:#fff}
+.x{background:#121b33;border:1px solid var(--line2);color:var(--muted);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;line-height:1;padding:0}
+.x:hover{color:#fecaca;border-color:#7f2a2a}
+.act{display:flex;gap:4px;justify-content:flex-end}
+.act .x{width:28px;height:28px;font-size:13px}
+.tk-link{color:var(--amber2);cursor:pointer;background:none;border:0;font:600 12.5px var(--font);padding:0;text-decoration:underline}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-bottom:10px}
+.toolbar label{min-width:110px}
+.toolbar .grow{min-width:170px}
+
+/* ---------- bilete ---------- */
+.ticket{background:linear-gradient(180deg,var(--card),#0f1830);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+.thead{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:9px 12px;background:#0f1938;border-bottom:1px solid var(--line)}
+.th-main{display:flex;gap:6px 8px;align-items:center;flex-wrap:wrap;font-size:13px}
+.tno{color:var(--amber2);font-size:14px}
+.th-main .m{color:var(--muted)}
+.th-main .m b{color:var(--text)}
+.st{font-size:11px;font-weight:800;letter-spacing:.4px;border-radius:999px;padding:1px 10px;line-height:20px;border:1px solid}
+.st-win{color:#86efac;border-color:#22c55e;background:#0d2a1a}
+.st-loss{color:#fca5a5;border-color:#f87171;background:#2b1212}
+.st-pending{color:var(--muted);border-color:var(--line2)}
+.st-void{color:#cbd5e1;border-color:#64748b;background:#1e293b}
+.profit{font-weight:700}.pos{color:var(--green2)}.neg{color:var(--red)}
+.stake-btn{background:#0a1226;border:1px dashed var(--line2);color:var(--text);border-radius:6px;padding:0 7px;font:650 13px var(--font);cursor:pointer}
+.stake-btn:hover{border-color:var(--amber)}
+.th-actions{display:flex;gap:6px}
+.th-actions .btn{padding:4px 9px;font-size:12px}
+.arch{opacity:.8}
+
+/* ---------- jurnal / test ---------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:#0c1429;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi span{display:block;color:var(--muted);font-size:12px}
+.kpi b{display:block;font-size:21px;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi small{color:var(--faint);font-size:11.5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.table-wrap{overflow-x:auto;max-width:100%}
+.grid2>*,.card>*{min-width:0}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th{color:var(--faint);font-weight:600;text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+table.t td{padding:6px 8px;border-bottom:1px solid #16213f;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.t th:first-child,table.t td:first-child{text-align:left}
+table.t tr:last-child td{border-bottom:0}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font:10.5px var(--font)}
+.verdict{border:1px solid var(--line2);border-left:4px solid var(--amber);border-radius:10px;padding:10px 14px;background:#0e1730;margin:10px 0}
+.verdict.good{border-left-color:var(--green)} .verdict.bad{border-left-color:var(--red)} .verdict.neutral{border-left-color:var(--blue)}
+.pv{font-variant-numeric:tabular-nums;font-weight:700}
+.sig{color:var(--green2)} .nosig{color:var(--muted)}
+
+/* ---------- modal + toast ---------- */
+.modal{position:fixed;inset:0;background:#030712d0;z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:6vh 12px;overflow:auto}
+.modal-card{position:relative;background:#0f1830;border:1px solid var(--line2);border-radius:14px;padding:18px 18px 16px;width:min(560px,100%)}
+.modal-card.wide{width:min(760px,100%)}
+.modal-x{position:absolute;right:10px;top:10px;background:none;border:0;color:var(--muted);font-size:22px;cursor:pointer;line-height:1}
+.modal h3{padding-right:28px}
+.modal p{color:var(--muted);margin:6px 0 14px}
+.modal .form-grid{margin-bottom:14px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#14305a;border:1px solid #2f5fa8;color:#dbeafe;padding:9px 16px;border-radius:10px;z-index:200;box-shadow:0 12px 36px #000a;max-width:calc(100vw - 24px);display:flex;gap:12px;align-items:center}
+.toast.err{background:#3a1519;border-color:#8a2a35;color:#fecaca}
+.toast button{background:none;border:0;color:var(--amber2);font:700 13px var(--font);cursor:pointer;padding:0}
+
+/* ---------- telefon ---------- */
+@media (max-width:860px){
+  .grid2{grid-template-columns:1fr}
+  .form-grid .wide{grid-column:span 2}
+}
+@media (max-width:760px){
+  body{font-size:14px}
+  .wrap{padding:0 10px}
+  .brand small{display:none}
+  .card{padding:12px}
+  .controls{align-items:stretch}
+  .controls label{flex:1 1 130px}
+  .controls input,.controls select{width:100%;min-width:0}
+  .controls .btn{flex:1 1 auto}
+  .th{display:none!important}
+  .tr{padding:10px 8px}
+  .leg{grid-template-columns:1fr auto;grid-template-areas:"match x" "meta meta" "odds res";row-gap:8px}
+  .leg>*{grid-row:auto;grid-column:auto}
+  .leg .c-match{grid-area:match}.leg .c-x{grid-area:x}.leg .meta{grid-area:meta}.leg .c-odds{grid-area:odds;width:104px}.leg .c-res{grid-area:res;justify-self:end}
+  .meta{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+  .meta>*{grid-area:auto}
+  .pick{grid-template-columns:26px 100px 1fr auto;grid-template-areas:"chk match match act" "meta meta meta meta" "odds odds res tk";row-gap:8px}
+  .pick>*{grid-row:auto;grid-column:auto}
+  .pick .c-chk{grid-area:chk}.pick .c-match{grid-area:match}.pick .c-act{grid-area:act}.pick .meta{grid-area:meta}.pick .c-odds{grid-area:odds;width:108px}.pick .c-res{grid-area:res;justify-self:start}.pick .c-tk{grid-area:tk;justify-self:end}
+  .thead{padding:9px 10px}
+  .toolbar label{flex:1 1 130px}
+  .tabs{gap:6px}
+  .tab{padding:8px 11px;font-size:13.5px}
+  .tab .lg{display:none}.tab .sh{display:inline}
+  .th-main .m{flex-basis:100%}.th-main .m::before{content:''}
+  .controls #gType,.controls label:has(#gType){flex:1 1 100%}
+  .kpi b{font-size:18px}
+}
+
+.foot{color:var(--faint);font-size:12px;line-height:1.6;padding:6px 2px 40px;max-width:900px}
+.hide-m{display:block}
+.table-wrap{overflow-x:auto}
+table.preview th{text-align:left;padding:4px}
+table.preview select{width:100%;font-size:12px;padding:4px 6px}
+table.preview td{text-align:left;white-space:normal;max-width:220px;overflow-wrap:anywhere}
+.tr .meta>*{grid-row:1}
+@keyframes flash{0%,100%{box-shadow:0 0 0 0 #f5a52400}30%{box-shadow:0 0 0 3px #f5a524cc}}
+.ticket.flash{animation:flash 1.5s ease-out}
+.tr.pick .c-act .x{margin-left:0}
+@media (max-width:760px){.hide-m{display:none}.tr .meta>*{grid-row:auto}.chart text{font-size:15px}}
+
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <symbol id="i-undo" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></symbol>
+  <symbol id="i-cog" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+</defs></svg>
+
+<header class="top"><div class="wrap top-in">
+  <div class="brand">
+    <svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#f5a524"/><path d="M14 22h36v6a4 4 0 0 0 0 8v6H14v-6a4 4 0 0 0 0-8z" fill="#1a1100"/><path d="M26 22v20M32 22v20M38 22v20" stroke="#f5a524" stroke-width="2" stroke-dasharray="2 3"/></svg>
+    <span><b>Bilete combinate</b><small>manager de bilete · jurnal · ROI · test control</small></span>
+  </div>
+  <button class="icon-btn" id="btnUndo" data-act="undo" title="Anulează ultima acțiune (Ctrl+Z)" aria-label="Anulează" disabled><svg class="ic"><use href="#i-undo"/></svg></button>
+  <button class="icon-btn" data-act="settings" title="Date și setări" aria-label="Date și setări"><svg class="ic"><use href="#i-cog"/></svg></button>
+</div></header>
+
+<div class="wrap">
+  <nav class="tabs" id="tabs" role="tablist">
+    <button class="tab" data-tab="oferta" role="tab">Ofertă <span class="n" id="nOferta">0</span></button>
+    <button class="tab" data-tab="bilet" role="tab">Bilet <span class="n" id="nBilet">0</span></button>
+    <button class="tab" data-tab="jurnal" role="tab"><span class="lg">Jurnal &amp; ROI</span><span class="sh">Jurnal</span></button>
+    <button class="tab" data-tab="test" role="tab"><span class="lg">Test control</span><span class="sh">Test</span></button>
+  </nav>
+
+  <main>
+    <div id="banner"></div>
+
+    <!-- ===================== OFERTĂ ===================== -->
+    <section id="tab-oferta" class="pane">
+      <details class="card" id="addCard">
+        <summary>Adaugă o selecție</summary>
+        <form id="addForm" class="form-grid" autocomplete="off">
+          <label>Data <input type="date" name="date"></label>
+          <label>Ora <input name="time" placeholder="16:00" maxlength="5"></label>
+          <label>Cod <input name="code" placeholder="7795"></label>
+          <label class="wide">Meci <input name="match" placeholder="Echipa 1 – Echipa 2" required></label>
+          <label class="wide">Campionat <input name="league" list="dlLeague" placeholder="Cehia - Liga 4"></label>
+          <label>Modul <input name="module" list="dlModule" placeholder="R1"></label>
+          <label>Piață <input name="market" list="dlMarket" placeholder="3+"></label>
+          <label>Cotă <input name="odds" placeholder="1,50" inputmode="decimal"></label>
+          <div class="form-actions"><button class="btn primary" type="submit">Adaugă în ofertă</button></div>
+        </form>
+      </details>
+
+      <details class="card" id="importCard">
+        <summary>Lipește din text sau Excel</summary>
+        <p class="hint">Lipește rânduri copiate din Excel, dintr-un tabel sau scrise de mână: <b>ora, cod, meci, campionat, modul, piață, cotă</b>
+          (în orice ordine; programul ghicește coloanele, iar tu le poți corecta în previzualizare). Merge și cu text liber, de exemplu
+          <code>16:00 7795 Echipa A – Echipa B R1 3+ 1,37</code>.</p>
+        <textarea id="pasteBox" rows="6" placeholder="16:00&#9;7795&#9;Viktoria Plzeň – Slovácko&#9;Cehia - 1. Liga&#9;R1&#9;3+&#9;1,37"></textarea>
+        <div class="row" style="margin-top:8px">
+          <button class="btn primary" id="btnParse">Previzualizează</button>
+          <label class="check"><input type="checkbox" id="optDedupe" checked> evită dublurile</label>
+        </div>
+        <div id="importPreview"></div>
+      </details>
+
+      <div class="card">
+        <div class="toolbar" id="pickToolbar">
+          <label class="grow">Caută <input id="fQ" type="search" placeholder="meci, cod, campionat…"></label>
+          <label>Data <select id="fDate"></select></label>
+          <label>Campionat <select id="fLeague"></select></label>
+          <label>Modul <select id="fModule"></select></label>
+          <label>Piață <select id="fMarket"></select></label>
+          <label>Arată <select id="fStatus">
+            <option value="all">toate</option><option value="free">care nu sunt în bilet</option><option value="in">din bilete</option>
+            <option value="pending">fără rezultat</option><option value="settled">cu rezultat</option></select></label>
+        </div>
+        <div class="row" id="pickActions" style="margin-bottom:8px"></div>
+        <div class="tbl" id="pickList"></div>
+      </div>
+    </section>
+
+    <!-- ===================== BILET ===================== -->
+    <section id="tab-bilet" class="pane hidden">
+      <div class="card">
+        <div class="sec-title">BILET</div>
+        <div class="controls">
+          <label>Miză / bilet <input id="stake" inputmode="decimal"></label>
+          <label>Tip <select id="gType">
+            <option value="n">bilete de câte N meciuri</option><option value="all">un singur bilet cu toate</option>
+            <option value="single">single (1 meci / bilet)</option><option value="league">câte un bilet pe campionat</option>
+            <option value="module">câte un bilet pe modul</option><option value="market">câte un bilet pe piață</option></select></label>
+          <label id="nWrap"><span id="nLabel">meciuri / bilet</span> <input id="gN" inputmode="numeric"></label>
+          <button class="btn" id="btnRegroup" data-act="regroup">Regrupează tot</button>
+          <button class="btn" data-act="clearTickets">Golește biletul</button>
+          <button class="btn" data-act="archive">Arhivează încheiate</button>
+        </div>
+        <details class="hint-box" id="biletHint"><summary>Cum funcționează grupările</summary>
+          <p class="hint">Când schimbi <b>tipul</b> sau <b>N</b>, tot biletul se reface pe loc. Când <b>adaugi</b> meciuri noi (alt campionat, altă selecție),
+          biletele deja făcute rămân neatinse, iar totul nou intră în bilete noi. Rezultatele (WIN / LOST) se păstrează la regrupare.
+          Biletele încheiate pot fi <b>arhivate</b>: dispar de aici, dar rămân în Jurnal &amp; ROI.</p></details>
+        <div class="row" style="margin-bottom:6px">
+          <label class="check"><input type="checkbox" id="viewAll"> arată și biletele arhivate</label>
+        </div>
+        <div class="summary" id="biletSummary"></div>
+      </div>
+      <div id="ticketList"></div>
+    </section>
+
+    <!-- ===================== JURNAL ===================== -->
+    <section id="tab-jurnal" class="pane hidden">
+      <div class="card">
+        <div class="toolbar">
+          <label>Perioadă <select id="jPeriod">
+            <option value="all">toată istoria</option><option value="today">azi</option><option value="7">ultimele 7 zile</option>
+            <option value="30">ultimele 30 de zile</option><option value="month">luna aceasta</option><option value="custom">interval…</option></select></label>
+          <label id="jFromW" class="hidden">De la <input type="date" id="jFrom"></label>
+          <label id="jToW" class="hidden">Până la <input type="date" id="jTo"></label>
+        </div>
+        <div id="jurnalBody"></div>
+      </div>
+    </section>
+
+    <!-- ===================== TEST CONTROL ===================== -->
+    <section id="tab-test" class="pane hidden">
+      <div class="card">
+        <div class="sec-title">TEST CONTROL: ai bătut norocul?</div>
+        <p class="hint" style="margin-top:0">Compară rezultatele selecțiilor tale (cele cu WIN / LOST) cu ce ar fi dat <b>doar norocul</b> la aceleași cote,
+          după ce scoți marja casei. Un rezultat bun pe puține selecții nu dovedește nimic; testul îți spune cât de ieșit din comun e.</p>
+        <div class="toolbar">
+          <label>Modul <select id="tModule"></select></label>
+          <label>Piață <select id="tMarket"></select></label>
+          <label>Campionat <select id="tLeague"></select></label>
+          <label>Marja casei (%) <input id="tMargin" inputmode="decimal" style="width:90px"></label>
+        </div>
+        <div id="testBody"></div>
+      </div>
+    </section>
+  </main>
+  <footer class="foot">Bilete combinate · v1.0 · datele rămân doar în acest browser și nu se trimit nicăieri. Programul ține evidența biletelor tale; <b>nu face predicții și nu garantează câștiguri</b>.
+    Pariurile implică risc de pierdere (18+): joacă doar cât îți permiți să pierzi.</footer>
+</div>
+
+<datalist id="dlLeague"></datalist>
+<datalist id="dlModule"></datalist>
+<datalist id="dlMarket"></datalist>
+
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true"><div class="modal-card" id="modalCard"><button class="modal-x" data-act="closeModal" aria-label="Închide">×</button><div id="modalBody"></div></div></div>
+<div id="toast" class="toast hidden" role="status"></div>
+<input type="file" id="fileImport" accept=".json,application/json" hidden>
+
+<script>
+/* Bilete combinate – logică pură (fără DOM): parsare, grupare în bilete, calcule și teste statistice. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.BC = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  const RES = ['pending', 'win', 'loss', 'void'];
+  const sum = a => { let s = 0; for (const x of a) s += x; return s; };
+  const mean = a => (a.length ? sum(a) / a.length : null);
+
+  // ------------------------------------------------------------------ parsare
+  function parseNum(v) {
+    if (v == null) return null;
+    if (typeof v === 'number') return isFinite(v) ? v : null;
+    const s = String(v).trim().replace(/\s+/g, '').replace(',', '.');
+    if (!/^-?\d+(\.\d+)?$/.test(s)) return null;
+    return parseFloat(s);
+  }
+  function parseOdds(v) { const x = parseNum(v); return x != null && x > 1 && x < 1000 ? x : null; }
+  function parseTime(v) {
+    if (v == null) return '';
+    const m = String(v).trim().match(/^(\d{1,2})[:.hH](\d{2})$/);
+    if (!m) return '';
+    const h = +m[1], mi = +m[2];
+    return h > 23 || mi > 59 ? '' : String(h).padStart(2, '0') + ':' + m[2];
+  }
+  function isoDate(y, m, d) {
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) return '';
+    return y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+  }
+  function parseDate(v, today) {
+    if (v == null) return '';
+    const s = String(v).trim();
+    let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (m) return isoDate(+m[1], +m[2], +m[3]);
+    m = s.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2}|\d{4})$/);
+    if (m) return isoDate(m[3].length === 2 ? 2000 + +m[3] : +m[3], +m[2], +m[1]);
+    m = s.match(/^(\d{1,2})[./](\d{1,2})$/);
+    if (m) return isoDate(today ? +today.slice(0, 4) : new Date().getFullYear(), +m[2], +m[1]);
+    return '';
+  }
+  function splitMatch(text) {
+    const t = String(text == null ? '' : text).trim();
+    for (const re of [/\s[–—]\s/, /\s-\s/, /\s+vs\.?\s+/i, /\s+v\s+/i, /[–—]/, /-/]) {
+      const parts = t.split(re);
+      if (parts.length === 2 && parts[0].trim() && parts[1].trim()) return { home: parts[0].trim(), away: parts[1].trim() };
+    }
+    return { home: t, away: '' };
+  }
+  const matchText = p => (p.away ? p.home + ' – ' + p.away : p.home);
+  const normModule = s => String(s == null ? '' : s).trim().toUpperCase();
+  function normMarket(s) {
+    const t = String(s == null ? '' : s).trim().replace(/\s+/g, ' ');
+    return /^(gg|ng|1x|x2|12|[12x])$/i.test(t) ? t.toUpperCase() : t;
+  }
+  const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  const keyOf = p => [p.date, p.code, p.home.toLowerCase(), p.away.toLowerCase(), p.market.toLowerCase()].join('|');
+
+  function makePick(src, id, today) {
+    const m = src.home != null || src.away != null
+      ? { home: String(src.home == null ? '' : src.home).trim(), away: String(src.away == null ? '' : src.away).trim() }
+      : splitMatch(src.match);
+    return {
+      id, date: parseDate(src.date, today) || today || '', time: parseTime(src.time),
+      code: String(src.code == null ? '' : src.code).trim(), home: m.home, away: m.away,
+      league: String(src.league == null ? '' : src.league).trim(), module: normModule(src.module),
+      market: normMarket(src.market), odds: parseOdds(src.odds),
+      res: RES.includes(src.res) ? src.res : 'pending', ticket: src.ticket || null, demo: !!src.demo,
+    };
+  }
+  const cmpPick = (a, b) =>
+    (a.date || '').localeCompare(b.date || '') ||
+    (a.time || '99:99').localeCompare(b.time || '99:99') ||
+    (parseNum(a.code) || 0) - (parseNum(b.code) || 0) ||
+    a.id.localeCompare(b.id, 'en', { numeric: true });
+
+  // ------------------------------------------------------------------ stare
+  function defaultState() {
+    return { v: 1, settings: { stake: 10, type: 'n', n: 3, currency: 'RON', margin: 5, control: 'CTRL' },
+             picks: [], tickets: [], seq: { pick: 1, ticket: 1 } };
+  }
+  function sanitizeState(o) {
+    const d = defaultState();
+    if (!o || typeof o !== 'object') return d;
+    const s = Object.assign({}, d.settings, o.settings || {});
+    s.stake = parseNum(s.stake) > 0 ? parseNum(s.stake) : 10;
+    s.n = Math.max(0, Math.floor(parseNum(s.n) || 0));
+    s.margin = Math.min(30, Math.max(0, parseNum(s.margin) || 0));
+    if (!['n', 'all', 'single', 'league', 'module', 'market'].includes(s.type)) s.type = 'n';
+    d.settings = s;
+    const tdy = today();
+    // id-urile trebuie să fie de forma p123 / t45 (altfel primesc id nou); evită injectarea de cod prin fișiere JSON manipulate
+    const idOk = (id, pre) => typeof id === 'string' && new RegExp('^' + pre + '\\d{1,9}$').test(id);
+    const maxNum = (arr, pre) => Math.max(0, ...arr.filter(x => x && idOk(x.id, pre)).map(x => parseInt(x.id.slice(1), 10)));
+    let nextP = maxNum(o.picks || [], 'p') + 1, nextT = maxNum(o.tickets || [], 't') + 1;
+    const ids = new Set(), tids = new Set(), tmap = new Map();
+    const rawTickets = (Array.isArray(o.tickets) ? o.tickets : []).filter(t => t && typeof t === 'object');
+    for (const t of rawTickets) {
+      const orig = t.id; let id = orig;
+      if (!idOk(id, 't') || tids.has(id)) id = 't' + nextT++;
+      tids.add(id); if (typeof orig === 'string' && !tmap.has(orig)) tmap.set(orig, id);
+      t.__id = id;
+    }
+    for (const p of Array.isArray(o.picks) ? o.picks : []) {
+      if (!p || typeof p !== 'object') continue;
+      let id = p.id;
+      if (!idOk(id, 'p') || ids.has(id)) id = 'p' + nextP++;
+      ids.add(id);
+      const np = makePick(p, id, tdy);
+      np.ticket = typeof p.ticket === 'string' && tmap.has(p.ticket) ? tmap.get(p.ticket) : null;
+      d.picks.push(np);
+    }
+    for (const t of rawTickets) {
+      d.tickets.push({ id: t.__id, no: Math.max(1, Math.floor(parseNum(t.no) || 1)), stake: parseNum(t.stake) > 0 ? parseNum(t.stake) : s.stake,
+                       date: parseDate(t.date) || tdy, archived: !!t.archived, custom: !!t.custom });
+    }
+    const used = new Set(d.picks.map(p => p.ticket).filter(Boolean));
+    d.tickets = d.tickets.filter(t => used.has(t.id));
+    const num = (arr, pre) => Math.max(0, ...arr.map(x => parseInt(x.id.slice(pre.length), 10) || 0)) + 1;
+    d.seq = { pick: num(d.picks, 'p'), ticket: num(d.tickets, 't') };
+    return d;
+  }
+
+  // ------------------------------------------------------------------ bilete
+  const legsOf = (st, tid) => st.picks.filter(p => p.ticket === tid).sort(cmpPick);
+
+  function ticketCalc(ticket, legs) {
+    const live = legs.filter(l => l.res !== 'void');
+    const withOdds = live.filter(l => l.odds);
+    const odds = withOdds.reduce((a, l) => a * l.odds, 1);
+    let status;
+    if (legs.some(l => l.res === 'loss')) status = 'loss';
+    else if (legs.some(l => l.res === 'pending')) status = 'pending';
+    else if (!live.length) status = 'void';
+    else status = 'win';
+    const stake = ticket.stake, potential = stake * odds;
+    const profit = status === 'win' ? potential - stake : status === 'loss' ? -stake : status === 'void' ? 0 : null;
+    return { legs: legs.length, live: live.length, missing: live.length - withOdds.length, hasOdds: withOdds.length > 0,
+             odds, status, stake, potential, profit };
+  }
+  const calcAll = (st, tickets) => tickets.map(t => ({ t, c: ticketCalc(t, legsOf(st, t.id)) }));
+
+  function summarize(rows) {
+    const r = { tickets: rows.length, legs: 0, turnover: 0, potential: 0, won: 0, lost: 0, pending: 0, voided: 0,
+                profit: 0, settledStake: 0, hit: null, roi: null };
+    for (const { t, c } of rows) {
+      r.legs += c.legs; r.turnover += t.stake; r.potential += c.potential;
+      if (c.status === 'win') r.won++; else if (c.status === 'loss') r.lost++;
+      else if (c.status === 'pending') r.pending++; else r.voided++;
+      if (c.status === 'win' || c.status === 'loss') { r.profit += c.profit; r.settledStake += t.stake; }
+    }
+    if (r.won + r.lost) r.hit = r.won / (r.won + r.lost);
+    if (r.settledStake) r.roi = r.profit / r.settledStake;
+    return r;
+  }
+
+  function groupPicks(picks, type, n) {
+    const sorted = picks.slice().sort(cmpPick);
+    n = Math.max(0, Math.floor(n) || 0);
+    const chunk = (arr, size) => {
+      if (!size || size >= arr.length) return arr.length ? [arr] : [];
+      const out = [];
+      for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+      return out;
+    };
+    if (type === 'all') return chunk(sorted, 0);
+    if (type === 'single') return sorted.map(p => [p]);
+    if (type === 'league' || type === 'module' || type === 'market') {
+      const f = p => (type === 'league' ? p.league : type === 'module' ? p.module : p.market) || '—';
+      const m = new Map();
+      for (const p of sorted) { const k = f(p); if (!m.has(k)) m.set(k, []); m.get(k).push(p); }
+      const out = [];
+      for (const arr of m.values()) out.push(...chunk(arr, n));
+      return out;
+    }
+    return chunk(sorted, n || 1);
+  }
+  const nextTicketNo = st => Math.max(0, ...st.tickets.map(t => t.no)) + 1;
+  function newTicket(st, stake, date) {
+    const t = { id: 't' + st.seq.ticket++, no: nextTicketNo(st), stake, date: date || '', archived: false, custom: false };
+    st.tickets.push(t);
+    return t;
+  }
+  /** Adaugă selecțiile date în bilete NOI; biletele existente rămân neatinse. Întoarce numărul de bilete create. */
+  function addToTickets(st, pickIds, type, n, stake) {
+    const ids = new Set(pickIds);
+    const picks = st.picks.filter(p => ids.has(p.id) && !p.ticket);
+    const groups = groupPicks(picks, type, n);
+    for (const g of groups) { const t = newTicket(st, stake, g[0].date); for (const p of g) p.ticket = t.id; }
+    return groups.length;
+  }
+  /** Reface toate biletele active (nearhivate) cu tipul/N curent. Rezultatele selecțiilor se păstrează. */
+  function regroup(st, type, n, stake) {
+    const act = new Set(st.tickets.filter(t => !t.archived).map(t => t.id));
+    const picks = st.picks.filter(p => p.ticket && act.has(p.ticket));
+    st.tickets = st.tickets.filter(t => !act.has(t.id));
+    for (const p of picks) p.ticket = null;
+    return addToTickets(st, picks.map(p => p.id), type, n, stake);
+  }
+  function dropEmptyTickets(st) {
+    const used = new Set(st.picks.map(p => p.ticket).filter(Boolean));
+    st.tickets = st.tickets.filter(t => used.has(t.id));
+  }
+  function removeFromTicket(st, pickId) {
+    const p = st.picks.find(x => x.id === pickId);
+    if (p) p.ticket = null;
+    dropEmptyTickets(st);
+  }
+  function deleteTicket(st, tid) { for (const p of st.picks) if (p.ticket === tid) p.ticket = null; dropEmptyTickets(st); }
+  function clearActive(st) {
+    const act = new Set(st.tickets.filter(t => !t.archived).map(t => t.id));
+    for (const p of st.picks) if (p.ticket && act.has(p.ticket)) p.ticket = null;
+    dropEmptyTickets(st);
+  }
+  function archiveSettled(st) {
+    let k = 0;
+    for (const t of st.tickets) {
+      if (t.archived) continue;
+      if (ticketCalc(t, legsOf(st, t.id)).status !== 'pending') { t.archived = true; k++; }
+    }
+    return k;
+  }
+  function deletePick(st, pickId) {
+    const i = st.picks.findIndex(p => p.id === pickId);
+    if (i >= 0) st.picks.splice(i, 1);
+    dropEmptyTickets(st);
+  }
+
+  // ------------------------------------------------------------------ importul din text
+  const ROLES = ['skip', 'date', 'time', 'code', 'match', 'home', 'away', 'league', 'module', 'market', 'odds'];
+  const MARKET_RE = /^(1|x|2|1x|x2|12|gg|ng|gg\/ng|\d\s?\+|(peste|sub|over|under|o|u)\s?\d([.,]\d)?|handicap.*|ht.*|ah.*)$/i;
+  const MODULE_RE = /^[A-Za-z]{1,3}\d{1,2}$/;
+  const roleTests = {
+    time: s => /^\d{1,2}:\d{2}$/.test(s) && parseTime(s) !== '',
+    date: s => parseDate(s, '2000-01-01') !== '' && !/:/.test(s) && /[-./]/.test(s),
+    code: s => /^\d{3,8}$/.test(s),
+    odds: s => /^\d{1,3}[.,]\d{1,3}$/.test(s) && parseOdds(s) != null,
+    market: s => MARKET_RE.test(s),
+    module: s => MODULE_RE.test(s) && !MARKET_RE.test(s),
+    match: s => splitMatch(s).away !== '',
+  };
+  function detectDelimiter(lines) {
+    let best = null;
+    for (const d of ['\t', ';', '|', ',']) {
+      const counts = lines.map(l => l.split(d).length);
+      const freq = new Map();
+      for (const c of counts) freq.set(c, (freq.get(c) || 0) + 1);
+      let mode = 0, mf = 0;
+      for (const [c, f] of freq) if (f > mf || (f === mf && c > mode)) { mode = c; mf = f; }
+      const minCols = d === ',' ? 4 : 3;
+      if (mode >= minCols && mf >= Math.max(1, Math.ceil(lines.length * 0.6))) {
+        if (!best || mode > best.cols) best = { d, cols: mode };
+        if (d === '\t' || d === ';') break;
+      }
+    }
+    return best ? best.d : null;
+  }
+  const HEADER_WORDS = { ora: 'time', timp: 'time', time: 'time', data: 'date', date: 'date', cod: 'code', code: 'code',
+    meci: 'match', match: 'match', echipe: 'match', gazde: 'home', oaspeti: 'away', oaspeți: 'away', campionat: 'league',
+    liga: 'league', competitie: 'league', competiție: 'league', modul: 'module', module: 'module', tactica: 'module',
+    piata: 'market', piața: 'market', selectie: 'market', selecție: 'market', pronostic: 'market', cota: 'odds', cotă: 'odds', odds: 'odds' };
+  function guessRoles(rows, ncols) {
+    const roles = new Array(ncols).fill('skip');
+    const scores = [], avgLen = [];
+    for (let c = 0; c < ncols; c++) {
+      const vals = rows.map(r => (r[c] || '').trim()).filter(Boolean);
+      const sc = {};
+      for (const [role, test] of Object.entries(roleTests)) sc[role] = vals.length ? vals.filter(test).length / vals.length : 0;
+      scores.push(sc);
+      avgLen.push(vals.length ? sum(vals.map(v => v.length)) / vals.length : 0);
+    }
+    const thr = { date: 0.9 };
+    const taken = new Set();
+    for (const role of ['match', 'time', 'date', 'odds', 'code', 'market', 'module']) {
+      let bc = -1, bs = (thr[role] || 0.6) - 1e-9;
+      for (let c = 0; c < ncols; c++) {
+        if (taken.has(c)) continue;
+        const sc = scores[c][role];
+        const better = sc > bs + 0.05 || (bc >= 0 && Math.abs(sc - bs) <= 0.05 && sc >= (thr[role] || 0.6) - 1e-9 && role === 'match' && avgLen[c] > avgLen[bc]);
+        if (bc < 0 ? sc > bs : better) { bs = Math.max(sc, bs); bc = c; }
+      }
+      if (bc >= 0) { roles[bc] = role; taken.add(bc); }
+    }
+    // coloana de campionat: prima coloană de text rămasă
+    for (let c = 0; c < ncols; c++) {
+      if (taken.has(c)) continue;
+      const vals = rows.map(r => (r[c] || '').trim()).filter(Boolean);
+      if (vals.length && vals.filter(v => /[A-Za-zĂÂÎȘȚăâîșț]{3,}/.test(v)).length / vals.length >= 0.6) { roles[c] = 'league'; break; }
+    }
+    return roles;
+  }
+  /** Împarte textul în rânduri/celule și ghicește rolul fiecărei coloane. Întoarce { mode, rows, roles, header }. */
+  function parseTable(text) {
+    const lines = String(text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (!lines.length) return { mode: 'empty', rows: [], roles: [], header: false };
+    const d = detectDelimiter(lines);
+    if (d) {
+      let rows = lines.map(l => l.split(d).map(c => c.trim().replace(/^"|"$/g, '')));
+      const ncols = Math.max(...rows.map(r => r.length));
+      rows = rows.map(r => r.concat(new Array(ncols - r.length).fill('')));
+      const first = rows[0].map(c => c.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+      const hdr = first.map(c => HEADER_WORDS[c] || null);
+      const isHeader = hdr.filter(Boolean).length >= 2;
+      if (isHeader) {
+        const body = rows.slice(1);
+        return { mode: 'table', rows: body, roles: hdr.map(r => r || 'skip'), header: true, delimiter: d };
+      }
+      return { mode: 'table', rows, roles: guessRoles(rows, ncols), header: false, delimiter: d };
+    }
+    // text liber: extragem cu expresii regulate
+    const rows = lines.map(l => {
+      let s = l, time = '', odds = '', code = '', module = '', market = '', league = '';
+      if (s.includes('|')) { const parts = s.split('|'); s = parts[0]; league = (parts[1] || '').trim(); }
+      let m = s.match(/(^|\s)(\d{1,2}:\d{2})(?=\s|$)/);
+      if (m) { time = m[2]; s = s.replace(m[0], ' '); }
+      m = s.match(/(^|\s)(\d{1,3}[.,]\d{1,3})\s*$/);
+      if (m) { odds = m[2]; s = s.replace(m[0], ' '); }
+      m = s.match(/(^|\s)(\d{3,8})(?=\s)/);
+      if (m) { code = m[2]; s = s.replace(m[0], ' '); }
+      m = s.match(/(^|\s)([A-Za-z]{1,3}\d{1,2})(?=\s|$)/);
+      if (m && !MARKET_RE.test(m[2])) { module = m[2]; s = s.replace(m[0], ' '); }
+      m = s.match(/(^|\s)((?:peste|sub|over|under)\s?\d(?:[.,]\d)?|gg\/ng|gg|ng|1x|x2|\d\s?\+)(?=\s|$)/i);
+      if (m) { market = m[2]; s = s.replace(m[0], ' '); }
+      return [time, code, s.replace(/\s+/g, ' ').trim(), league, module, market, odds];
+    });
+    return { mode: 'free', rows, roles: ['time', 'code', 'match', 'league', 'module', 'market', 'odds'], header: false };
+  }
+  /** Transformă rândurile + rolurile în selecții (obiecte brute, fără id). */
+  function rowsToPicks(rows, roles) {
+    const out = [];
+    for (const r of rows) {
+      const o = {};
+      roles.forEach((role, i) => { if (role !== 'skip' && (r[i] || '').trim()) o[role] = (r[i] || '').trim(); });
+      if (!o.match && !o.home) continue;
+      out.push(o);
+    }
+    return out;
+  }
+
+  // ------------------------------------------------------------------ statistică
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function poissonBinomialPmf(ps) {
+    let pmf = [1];
+    for (const p of ps) {
+      const nx = new Array(pmf.length + 1).fill(0);
+      for (let k = 0; k < pmf.length; k++) { nx[k] += pmf[k] * (1 - p); nx[k + 1] += pmf[k] * p; }
+      pmf = nx;
+    }
+    return pmf;
+  }
+  /** P(W >= w) pentru suma unor evenimente independente cu probabilitățile ps. */
+  function pbTailGE(ps, w) { const pmf = poissonBinomialPmf(ps); let s = 0; for (let k = Math.max(0, w); k < pmf.length; k++) s += pmf[k]; return Math.min(1, s); }
+  function pbTailLE(ps, w) { const pmf = poissonBinomialPmf(ps); let s = 0; for (let k = 0; k <= Math.min(w, pmf.length - 1); k++) s += pmf[k]; return Math.min(1, s); }
+
+  const _lf = [0, 0];
+  function lf(n) { for (let i = _lf.length; i <= n; i++) _lf[i] = _lf[i - 1] + Math.log(i); return _lf[n]; }
+  /** Testul exact Fisher pe tabelul [[a,b],[c,d]] (grupa 1: a câștigate, b pierdute; grupa 2: c, d). */
+  function fisherExact(a, b, c, d) {
+    const n1 = a + b, n2 = c + d, k = a + c, N = n1 + n2;
+    if (!n1 || !n2) return { twoSided: 1, greater: 1, less: 1 };
+    const lo = Math.max(0, k - n2), hi = Math.min(k, n1);
+    const lp = x => lf(n1) - lf(x) - lf(n1 - x) + lf(n2) - lf(k - x) - lf(n2 - k + x) - (lf(N) - lf(k) - lf(N - k));
+    const pObs = Math.exp(lp(a));
+    let two = 0, gr = 0, le = 0;
+    for (let x = lo; x <= hi; x++) {
+      const p = Math.exp(lp(x));
+      if (p <= pObs * (1 + 1e-7)) two += p;
+      if (x >= a) gr += p;
+      if (x <= a) le += p;
+    }
+    return { twoSided: Math.min(1, two), greater: Math.min(1, gr), less: Math.min(1, le) };
+  }
+  function quantile(sortedArr, q) {
+    if (!sortedArr.length) return null;
+    const i = (sortedArr.length - 1) * q, lo = Math.floor(i), hi = Math.ceil(i);
+    return sortedArr[lo] + (sortedArr[hi] - sortedArr[lo]) * (i - lo);
+  }
+  function bootstrapMeanCI(values, B, seed, level) {
+    if (!values.length) return null;
+    level = level || 0.90;
+    const rng = mulberry32(seed), n = values.length, means = new Float64Array(B);
+    for (let b = 0; b < B; b++) { let s = 0; for (let i = 0; i < n; i++) s += values[(rng() * n) | 0]; means[b] = s / n; }
+    const sorted = Array.from(means).sort((x, y) => x - y);
+    return { lo: quantile(sorted, (1 - level) / 2), hi: quantile(sorted, 1 - (1 - level) / 2) };
+  }
+  function simulateProfit(odds, ps, B, seed) {
+    const rng = mulberry32(seed), n = odds.length, out = new Float64Array(B);
+    for (let b = 0; b < B; b++) { let s = 0; for (let i = 0; i < n; i++) s += rng() < ps[i] ? odds[i] - 1 : -1; out[b] = s; }
+    return out;
+  }
+  function histogram(arr, bins) {
+    let lo = Infinity, hi = -Infinity;
+    for (const x of arr) { if (x < lo) lo = x; if (x > hi) hi = x; }
+    if (!isFinite(lo)) return { lo: 0, hi: 1, counts: new Array(bins).fill(0) };
+    if (hi === lo) hi = lo + 1;
+    const counts = new Array(bins).fill(0), w = (hi - lo) / bins;
+    for (const x of arr) counts[Math.min(bins - 1, Math.floor((x - lo) / w))]++;
+    return { lo, hi, counts };
+  }
+  const zQ = { 0.90: 1.2816, 0.95: 1.6449, 0.975: 1.96, 0.80: 0.8416 };
+  /** Câte selecții trebuie ca o reușită cu `delta` peste p0 să iasă din zgomot (test unilateral 5%, putere 80%). */
+  function sampleSizeForEdge(p0, delta) {
+    const p1 = Math.min(0.999, p0 + delta);
+    const num = zQ[0.95] * Math.sqrt(p0 * (1 - p0)) + zQ[0.80] * Math.sqrt(p1 * (1 - p1));
+    return Math.ceil((num * num) / (delta * delta));
+  }
+
+  /** Statistici pe selecții (nivel „single”): reușită, cotă medie, profit/ROI cu miză egală. */
+  function quickStats(picks, margin) {
+    const settled = picks.filter(p => p.res === 'win' || p.res === 'loss');
+    const wins = settled.filter(p => p.res === 'win').length;
+    const ow = settled.filter(p => p.odds);
+    const m = 1 + (margin || 0) / 100;
+    const ps = ow.map(p => Math.min(0.999, 1 / (p.odds * m)));
+    const owWins = ow.filter(p => p.res === 'win').length;
+    const profit = sum(ow.map(p => (p.res === 'win' ? p.odds - 1 : -1)));
+    return {
+      total: picks.length, n: settled.length, wins, losses: settled.length - wins,
+      pending: picks.filter(p => p.res === 'pending').length, voids: picks.filter(p => p.res === 'void').length,
+      hit: settled.length ? wins / settled.length : null, nOdds: ow.length, owWins,
+      owHit: ow.length ? owWins / ow.length : null, avgOdds: mean(ow.map(p => p.odds)),
+      expHit: ow.length ? mean(ps) : null, expWins: sum(ps), profit, roi: ow.length ? profit / ow.length : null,
+      pHit: ow.length ? pbTailGE(ps, owWins) : null, pLow: ow.length ? pbTailLE(ps, owWins) : null, ps,
+    };
+  }
+  /** Analiza completă pentru „Test control”: p-valori exacte/simulate, interval ROI, histogramă. */
+  function analyzeLegs(picks, opts) {
+    opts = opts || {};
+    const B = opts.sims || 20000, seed = opts.seed || 12345;
+    const q = quickStats(picks, opts.margin);
+    const ow = picks.filter(p => (p.res === 'win' || p.res === 'loss') && p.odds);
+    q.sims = B;
+    if (ow.length) {
+      const odds = ow.map(p => p.odds);
+      const sim = simulateProfit(odds, q.ps, B, seed);
+      let ge = 0, le = 0;
+      for (const x of sim) { if (x >= q.profit - 1e-9) ge++; if (x <= q.profit + 1e-9) le++; }
+      q.pProfit = (ge + 1) / (B + 1); q.pProfitLow = (le + 1) / (B + 1);
+      const sorted = Array.from(sim).sort((x, y) => x - y);
+      q.simMean = mean(Array.from(sim)); q.simLo = quantile(sorted, 0.05); q.simHi = quantile(sorted, 0.95);
+      q.hist = histogram(sim, 28);
+      q.ci = bootstrapMeanCI(ow.map(p => (p.res === 'win' ? p.odds - 1 : -1)), Math.min(5000, B), seed + 1, 0.90);
+    }
+    return q;
+  }
+
+  return {
+    RES, ROLES, today, parseNum, parseOdds, parseTime, parseDate, splitMatch, matchText, normModule, normMarket, keyOf, makePick, cmpPick,
+    defaultState, sanitizeState, legsOf, ticketCalc, calcAll, summarize, groupPicks, nextTicketNo, newTicket, addToTickets, regroup,
+    dropEmptyTickets, removeFromTicket, deleteTicket, clearActive, archiveSettled, deletePick, parseTable, rowsToPicks, detectDelimiter,
+    mulberry32, poissonBinomialPmf, pbTailGE, pbTailLE, fisherExact, quantile, bootstrapMeanCI, simulateProfit, histogram,
+    sampleSizeForEdge, quickStats, analyzeLegs, sum, mean,
+  };
+});
+
+;(function () {
+'use strict';
+const BC = window.BC;
+const KEY = 'bilete-combinate-v1';
+
+// ------------------------------------------------------------------ utilitare
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ok = x => x != null && isFinite(x);
+const fm = (x, d = 2) => (ok(x) ? x.toFixed(d).replace('.', ',') : '–');
+const fs = (x, d = 2) => (ok(x) ? (x > 0.0000001 ? '+' : x < -0.0000001 ? '−' : '') + Math.abs(x).toFixed(d).replace('.', ',') : '–');
+const pc = (x, d = 1) => (ok(x) ? (x < -0.0000001 ? '−' : '') + Math.abs(x * 100).toFixed(d).replace('.', ',') + '%' : '–');
+const fp = p => (!ok(p) ? '–' : p < 0.001 ? '< 0,001' : p.toFixed(3).replace('.', ','));
+const fdate = iso => (iso ? iso.slice(8, 10) + '.' + iso.slice(5, 7) : '');
+const fdateFull = iso => (iso ? iso.slice(8, 10) + '.' + iso.slice(5, 7) + '.' + iso.slice(0, 4) : '');
+const dayName = iso => { try { return new Date(iso + 'T12:00:00').toLocaleDateString('ro-RO', { weekday: 'short' }); } catch (e) { return ''; } };
+const shiftDate = (iso, days) => { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + days); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const ICON = n => `<svg class="ic"><use href="#i-${n}"/></svg>`;
+function hueOf(m) {
+  const s = String(m || '');
+  const digit = parseInt((s.match(/\d+/) || ['0'])[0], 10) || 0;
+  if (/^R/i.test(s)) return 24 + (digit * 13) % 40;       // R* → nuanțe de portocaliu/roșu
+  if (/^T/i.test(s)) return 255 + (digit * 17) % 50;      // T* → nuanțe de violet
+  let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) % 360; return h;
+}
+const modBadge = m => (m ? `<span class="mod" style="--h:${hueOf(m)}">${esc(m)}</span>` : '<span class="faint">–</span>');
+const mktBadge = m => (m ? `<span class="mkt">${esc(m)}</span>` : '<span class="faint">–</span>');
+const statusLabel = { win: 'CÂȘTIGAT', loss: 'PIERDUT', pending: 'ÎN AȘTEPTARE', void: 'ANULAT' };
+
+// ------------------------------------------------------------------ stare + salvare
+let state, storageOK = true;
+const ui = {
+  tab: 'oferta', sel: new Set(), parsed: null, impDate: '', viewAll: false,
+  f: { q: '', date: '', league: '', module: '', market: '', status: 'all' },
+  j: { period: 'all', from: '', to: '' }, t: { module: '', market: '', league: '' },
+};
+const hist = [];
+let saveTimer = null;
+
+function loadState() {
+  try {
+    const raw = window.localStorage.getItem(KEY);
+    return raw ? BC.sanitizeState(JSON.parse(raw)) : BC.defaultState();
+  } catch (e) { storageOK = false; return BC.defaultState(); }
+}
+function saveNow() {
+  if (!storageOK) return;
+  try { window.localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch (e) { storageOK = false; renderBanner(); }
+}
+function save() { clearTimeout(saveTimer); saveNow(); }
+window.addEventListener('pagehide', saveNow);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveNow(); });
+window.addEventListener('storage', e => {          // aceeași aplicație deschisă în altă filă a browserului
+  if (e.key !== KEY || e.newValue == null) return;
+  try { state = BC.sanitizeState(JSON.parse(e.newValue)); renderAll(); } catch (err) { /* ignorăm */ }
+});
+function snap() { hist.push(JSON.stringify(state)); if (hist.length > 40) hist.shift(); updateUndo(); }
+function updateUndo() { const b = $('#btnUndo'); if (b) b.disabled = !hist.length; }
+function undo() {
+  if (!hist.length) return;
+  state = BC.sanitizeState(JSON.parse(hist.pop()));
+  saveNow(); updateUndo(); renderAll(); toast('Acțiune anulată');
+}
+/** Modifică starea (cu posibilitate de anulare), salvează și redesenează. */
+function mutate(fn, opts) {
+  snap();
+  const r = fn(state);
+  save();
+  if (!opts || !opts.noRender) renderAll();
+  return r;
+}
+
+// ------------------------------------------------------------------ mesaje, ferestre, clipboard, descărcări
+let toastTimer = null;
+function toast(msg, o) {
+  o = o || {};
+  const el = $('#toast');
+  el.className = 'toast' + (o.err ? ' err' : '');
+  el.innerHTML = '<span>' + esc(msg) + '</span>' + (o.action ? `<button data-act="${o.action}">${esc(o.label)}</button>` : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), o.ms || 3400);
+}
+let modalResolve = null;
+function openModal(html, o) {
+  o = o || {};
+  $('#modalBody').innerHTML = html;
+  $('#modalCard').classList.toggle('wide', !!o.wide);
+  $('#modal').classList.remove('hidden');
+  modalResolve = o.resolve || null;
+  if (o.onOpen) o.onOpen($('#modalBody'));
+}
+function closeModal(value) {
+  $('#modal').classList.add('hidden');
+  const r = modalResolve; modalResolve = null;
+  if (r) r(value == null ? null : value);
+}
+function confirmBox(msg, o) {
+  o = o || {};
+  return new Promise(res => openModal(
+    `<h3>${esc(o.title || 'Confirmă')}</h3><p>${msg}</p><div class="row end"><button class="btn" data-act="closeModal">Anulează</button>` +
+    `<button class="btn ${o.danger ? 'danger' : 'primary'}" data-act="modalOk">${esc(o.ok || 'Da')}</button></div>`,
+    { resolve: v => res(v === 'ok') }));
+}
+function copyText(text) {
+  const legacy = () => new Promise((res, rej) => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(ta); ta.select();
+      const done = document.execCommand('copy');
+      document.body.removeChild(ta);
+      done ? res() : rej(new Error('copy'));
+    } catch (e) { rej(e); }
+  });
+  if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text).catch(legacy);
+  return legacy();
+}
+function download(name, text, mime) {
+  const url = URL.createObjectURL(new Blob([text], { type: mime }));
+  const a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 600);
+}
+
+// ------------------------------------------------------------------ cadru: antet, file, avertismente
+function renderHeader() {
+  $('#nOferta').textContent = state.picks.length;
+  $('#nBilet').textContent = state.tickets.filter(t => !t.archived).length;
+  $$('.tab').forEach(b => { const on = b.dataset.tab === ui.tab; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
+  updateUndo();
+}
+function renderBanner() {
+  const demo = state.picks.filter(p => p.demo).length;
+  let h = '';
+  if (!storageOK) h += '<div class="banner warn"><span>Datele <b>nu se pot salva</b> în acest context (previzualizare sau browser care blochează stocarea). Deschide fișierul direct în browser sau fă copii JSON din „Date și setări”.</span></div>';
+  if (demo) h += `<div class="banner info"><span><b>Date demonstrative</b>: ${demo} selecții de exemplu (nu sunt predicții reale).</span><button class="btn small" data-act="removeDemo">Șterge datele demo</button></div>`;
+  $('#banner').innerHTML = h;
+}
+function showTab(name) {
+  ui.tab = name; state.settings.tab = name; save();
+  $$('.pane').forEach(p => p.classList.toggle('hidden', p.id !== 'tab-' + name));
+  renderAll();
+  window.scrollTo(0, 0);
+}
+function renderAll() {
+  renderHeader(); renderBanner();
+  ({ oferta: renderOferta, bilet: renderBilet, jurnal: renderJurnal, test: renderTest })[ui.tab]();
+}
+const emptyBox = (title, text, extra) => `<div class="empty"><b>${esc(title)}</b>${text ? esc(text) : ''}${extra ? '<div style="margin-top:12px">' + extra + '</div>' : ''}</div>`;
+
+// ================================================================== OFERTĂ
+const BASE_MARKETS = ['1', 'X', '2', '1X', 'X2', '12', 'GG', 'NG', '1+', '2+', '3+', '4+', 'Peste 1.5', 'Peste 2.5', 'Peste 3.5', 'Sub 2.5', 'Sub 3.5'];
+const uniqVals = k => [...new Set(state.picks.map(p => p[k]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ro', { numeric: true }));
+
+function fillSelect(el, items, current, allLabel) {
+  el.innerHTML = `<option value="">${esc(allLabel)}</option>` + items.map(x => {
+    const v = Array.isArray(x) ? x[0] : x, l = Array.isArray(x) ? x[1] : x;
+    return `<option value="${esc(v)}">${esc(l)}</option>`;
+  }).join('');
+  el.value = items.some(x => (Array.isArray(x) ? x[0] : x) === current) ? current : '';
+}
+function filteredPicks() {
+  const f = ui.f, q = f.q.trim().toLowerCase();
+  return state.picks.filter(p =>
+    (!q || (BC.matchText(p) + ' ' + p.code + ' ' + p.league + ' ' + p.module + ' ' + p.market).toLowerCase().includes(q)) &&
+    (!f.date || p.date === f.date) && (!f.league || p.league === f.league) &&
+    (!f.module || p.module === f.module) && (!f.market || p.market === f.market) &&
+    (f.status === 'all' || (f.status === 'free' && !p.ticket) || (f.status === 'in' && p.ticket) ||
+     (f.status === 'pending' && p.res === 'pending') || (f.status === 'settled' && (p.res === 'win' || p.res === 'loss')))
+  ).sort(BC.cmpPick);
+}
+function resButtons(p) {
+  const b = (v, label, cls, title) => `<button class="rb ${cls}${p.res === v ? ' on' : ''}" data-act="res" data-id="${esc(p.id)}" data-v="${v}" title="${title}">${label}</button>`;
+  return b('win', 'WIN', 'win', 'Câștigat') + b('loss', 'LOST', 'loss', 'Pierdut') + b('pending', '↺', 'reset', 'Fără rezultat (resetează)') + (p.res === 'void' ? b('void', 'ANUL', 'void', 'Anulat') : '');
+}
+function pickRowHTML(p) {
+  const tk = p.ticket ? state.tickets.find(t => t.id === p.ticket) : null;
+  return `<div class="tr pick" data-id="${esc(p.id)}">
+    <div class="c-chk"><input type="checkbox" class="sel" data-id="${esc(p.id)}"${ui.sel.has(p.id) ? ' checked' : ''}${p.ticket ? ' disabled' : ''} aria-label="Bifează"></div>
+    <div class="c-match">${esc(BC.matchText(p))}</div>
+    <div class="meta">
+      <span class="c-when">${esc(fdate(p.date))}${p.time ? ' ' + esc(p.time) : ''}</span><span class="c-code">${esc(p.code)}</span>
+      <span class="c-league">${esc(p.league)}${p.demo ? ' <span class="faint">· demo</span>' : ''}</span><span class="c-mod">${modBadge(p.module)}</span><span class="c-mkt">${mktBadge(p.market)}</span>
+    </div>
+    <div class="c-odds"><input class="odds" data-id="${esc(p.id)}" value="${p.odds ? fm(p.odds) : ''}" placeholder="cotă" inputmode="decimal" aria-label="Cotă"></div>
+    <div class="c-res">${resButtons(p)}</div>
+    <div class="c-tk">${tk ? `<button class="tk-link" data-act="gotoTicket" data-id="${esc(tk.id)}">#${tk.no}</button>` : '<span class="faint">–</span>'}</div>
+    <div class="c-act"><button class="x" data-act="editPick" data-id="${esc(p.id)}" title="Editează">${ICON('edit')}</button><button class="x" data-act="delPick" data-id="${esc(p.id)}" title="Șterge">${ICON('trash')}</button></div>
+  </div>`;
+}
+function renderOferta() {
+  const leagues = uniqVals('league'), modules = uniqVals('module'), markets = uniqVals('market');
+  const opt = x => `<option value="${esc(x)}">`;
+  $('#dlLeague').innerHTML = leagues.map(opt).join('');
+  $('#dlModule').innerHTML = modules.map(opt).join('');
+  $('#dlMarket').innerHTML = [...new Set([...markets, ...BASE_MARKETS])].map(opt).join('');
+  const dates = [...new Set(state.picks.map(p => p.date).filter(Boolean))].sort().reverse().map(d => [d, fdateFull(d) + ' (' + dayName(d) + ')']);
+  fillSelect($('#fDate'), dates, ui.f.date, 'toate'); ui.f.date = $('#fDate').value;
+  fillSelect($('#fLeague'), leagues, ui.f.league, 'toate'); ui.f.league = $('#fLeague').value;
+  fillSelect($('#fModule'), modules, ui.f.module, 'toate'); ui.f.module = $('#fModule').value;
+  fillSelect($('#fMarket'), markets, ui.f.market, 'toate'); ui.f.market = $('#fMarket').value;
+  $('#fStatus').value = ui.f.status;
+  if (document.activeElement !== $('#fQ')) $('#fQ').value = ui.f.q;
+  if (!$('#addForm').date.value) $('#addForm').date.value = BC.today();
+  if (state.picks.length && !$('#addCard').dataset.touched) { $('#addCard').open = false; }
+  if (!state.picks.length) { $('#addCard').open = true; }
+
+  const list = filteredPicks();
+  const free = list.filter(p => !p.ticket);
+  const selShown = list.filter(p => ui.sel.has(p.id) && !p.ticket);
+  for (const id of [...ui.sel]) if (!state.picks.some(p => p.id === id && !p.ticket)) ui.sel.delete(id);
+
+  $('#pickActions').innerHTML = state.picks.length
+    ? `<span class="muted small">${state.picks.length} selecții · ${list.length} afișate · ${free.length} nu sunt încă în bilet</span><span class="grow"></span>` +
+      (ui.sel.size ? `<button class="btn primary" data-act="addSel">Adaugă bifatele la bilet (${ui.sel.size})</button>` : '') +
+      `<button class="btn ${ui.sel.size ? '' : 'primary'}" data-act="addFree"${free.length ? '' : ' disabled'}>Adaugă la bilet cele afișate (${free.length})</button>` +
+      `<button class="btn" data-act="${selShown.length === free.length && free.length ? 'selNone' : 'selAll'}"${free.length ? '' : ' disabled'}>${selShown.length === free.length && free.length ? 'Debifează' : 'Bifează afișatele'}</button>` +
+      `<button class="btn danger" data-act="delShown"${list.length ? '' : ' disabled'}>Șterge afișatele</button>`
+    : '';
+  const head = `<div class="tr th pick"><div class="c-chk"></div><div class="c-when">Data / ora</div><div class="c-code">Cod</div><div class="c-match">Meci</div><div class="c-league">Campionat</div>` +
+    `<div class="c-mod">Modul</div><div class="c-mkt">Piață</div><div class="c-odds" style="text-align:right">Cotă</div><div class="c-res">Rezultat</div><div class="c-tk">Bilet</div><div class="c-act"></div></div>`;
+  if (!state.picks.length) {
+    $('#pickList').innerHTML = emptyBox('Nicio selecție încă', 'Adaugă una manual, lipește un text sau încarcă un exemplu ca să vezi cum merge.',
+      '<button class="btn primary" data-act="loadDemo">Încarcă exemplu demo</button>');
+  } else if (!list.length) {
+    $('#pickList').innerHTML = emptyBox('Nicio selecție pentru filtrele alese', '', '<button class="btn" data-act="resetFilters">Resetează filtrele</button>');
+  } else {
+    $('#pickList').innerHTML = head + list.map(pickRowHTML).join('');
+  }
+}
+
+// ---------------------------------------------------------------- adăugare manuală
+function submitAddForm(form) {
+  const raw = Object.fromEntries(new FormData(form).entries());
+  if (!String(raw.match || '').trim()) return;
+  if (BC.splitMatch(raw.match).away === '') { toast('Scrie meciul ca „Echipa 1 – Echipa 2”', { err: true }); return; }
+  if (raw.odds && BC.parseOdds(raw.odds) == null) { toast('Cotă invalidă (trebuie să fie > 1,00)', { err: true }); return; }
+  mutate(st => { st.picks.push(BC.makePick(raw, 'p' + st.seq.pick++, BC.today())); });
+  for (const n of ['match', 'code', 'odds', 'time']) form[n].value = '';
+  form.match.focus();
+  toast('Selecție adăugată');
+}
+
+// ---------------------------------------------------------------- import din text
+function doParse() {
+  const r = BC.parseTable($('#pasteBox').value);
+  ui.parsed = r.mode === 'empty' ? null : r;
+  if (!ui.parsed) toast('Lipește mai întâi textul', { err: true });
+  renderImportPreview();
+}
+const ROLE_LABELS = { skip: '— ignoră —', date: 'Data', time: 'Ora', code: 'Cod', match: 'Meci (A – B)', home: 'Echipa 1', away: 'Echipa 2', league: 'Campionat', module: 'Modul', market: 'Piață', odds: 'Cotă' };
+function renderImportPreview() {
+  const box = $('#importPreview'), r = ui.parsed;
+  if (!r) { box.innerHTML = ''; return; }
+  const picks = BC.rowsToPicks(r.rows, r.roles);
+  const head = r.roles.map((role, i) => `<th><select data-role="${i}">${BC.ROLES.map(k => `<option value="${k}"${k === role ? ' selected' : ''}>${ROLE_LABELS[k]}</option>`).join('')}</select></th>`).join('');
+  const body = r.rows.slice(0, 8).map(row => '<tr>' + r.roles.map((_, i) => `<td>${esc(row[i] || '')}</td>`).join('') + '</tr>').join('');
+  box.innerHTML = `<div class="hint" style="margin-top:12px">Am găsit <b>${r.rows.length}</b> rânduri (${r.mode === 'table' ? 'tabel' + (r.header ? ' cu antet' : '') : 'text liber'}); se vor importa <b>${picks.length}</b>.
+      Verifică ce înseamnă fiecare coloană (poți schimba din liste):</div>
+    <div class="table-wrap"><table class="t preview"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>
+    ${r.rows.length > 8 ? `<div class="faint small" style="margin-top:4px">… și încă ${r.rows.length - 8} rânduri.</div>` : ''}
+    <div class="row" style="margin-top:10px"><label class="inline">Data implicită <input type="date" id="impDate" value="${esc(ui.impDate || BC.today())}"></label>
+    <button class="btn primary" data-act="doImport"${picks.length ? '' : ' disabled'}>Importă ${picks.length} selecții</button><button class="btn ghost" data-act="cancelImport">Anulează</button></div>`;
+}
+function doImport() {
+  const r = ui.parsed; if (!r) return;
+  const raws = BC.rowsToPicks(r.rows, r.roles);
+  const date = $('#impDate') ? ($('#impDate').value || BC.today()) : BC.today();
+  ui.impDate = date;
+  const dedupe = $('#optDedupe').checked;
+  let added = 0, skipped = 0, bad = 0;
+  mutate(st => {
+    const seen = new Set(st.picks.map(BC.keyOf));
+    for (const raw of raws) {
+      const p = BC.makePick(raw, 'p' + st.seq.pick, date);
+      if (!p.home) { bad++; continue; }
+      if (dedupe && seen.has(BC.keyOf(p))) { skipped++; continue; }
+      st.seq.pick++; st.picks.push(p); seen.add(BC.keyOf(p)); added++;
+    }
+  });
+  ui.parsed = null; $('#pasteBox').value = ''; renderImportPreview(); $('#importCard').open = false;
+  toast(`Importate ${added} selecții` + (skipped ? ` · ${skipped} dubluri omise` : '') + (bad ? ` · ${bad} rânduri fără meci` : ''));
+}
+
+// ---------------------------------------------------------------- editare / ștergere
+function editPickModal(id) {
+  const p = state.picks.find(x => x.id === id); if (!p) return;
+  const tk = p.ticket && state.tickets.find(t => t.id === p.ticket);
+  openModal(`<h3>Editează selecția</h3>
+    <div class="form-grid" id="editForm" data-id="${esc(p.id)}">
+      <label>Data <input type="date" name="date" value="${esc(p.date)}"></label>
+      <label>Ora <input name="time" value="${esc(p.time)}" placeholder="16:00"></label>
+      <label>Cod <input name="code" value="${esc(p.code)}"></label>
+      <label class="wide">Meci <input name="match" value="${esc(BC.matchText(p))}"></label>
+      <label class="wide">Campionat <input name="league" value="${esc(p.league)}" list="dlLeague"></label>
+      <label>Modul <input name="module" value="${esc(p.module)}" list="dlModule"></label>
+      <label>Piață <input name="market" value="${esc(p.market)}" list="dlMarket"></label>
+      <label>Cotă <input name="odds" value="${p.odds ? fm(p.odds) : ''}" inputmode="decimal"></label>
+      <label>Rezultat <select name="res"><option value="pending">fără rezultat</option><option value="win">câștigat</option><option value="loss">pierdut</option><option value="void">anulat</option></select></label>
+    </div>
+    ${tk ? `<p class="small">Este în biletul #${tk.no}${tk.archived ? ' (arhivat)' : ''}; modificările se văd și acolo.</p>` : ''}
+    <div class="row end"><button class="btn" data-act="closeModal">Anulează</button><button class="btn primary" data-act="savePick">Salvează</button></div>`,
+    { onOpen: b => { b.querySelector('[name=res]').value = p.res; } });
+}
+function savePickFromModal() {
+  const f = $('#editForm'), id = f.dataset.id;
+  const v = n => f.querySelector(`[name=${n}]`).value;
+  if (BC.splitMatch(v('match')).away === '') { toast('Scrie meciul ca „Echipa 1 – Echipa 2”', { err: true }); return; }
+  if (v('odds').trim() && BC.parseOdds(v('odds')) == null) { toast('Cotă invalidă', { err: true }); return; }
+  mutate(st => {
+    const p = st.picks.find(x => x.id === id); if (!p) return;
+    const n = BC.makePick({ date: v('date'), time: v('time'), code: v('code'), match: v('match'), league: v('league'), module: v('module'),
+      market: v('market'), odds: v('odds'), res: v('res'), ticket: p.ticket, demo: p.demo }, id, p.date);
+    Object.assign(p, n);
+  });
+  closeModal(); toast('Salvat');
+}
+async function deletePick(id) {
+  const p = state.picks.find(x => x.id === id); if (!p) return;
+  const tk = p.ticket && state.tickets.find(t => t.id === p.ticket);
+  if (tk && tk.archived) { toast('Selecția e într-un bilet arhivat; șterge întâi biletul din Jurnal.', { err: true }); return; }
+  if (!(await confirmBox(`Ștergi selecția <b>${esc(BC.matchText(p))}</b>?` + (tk ? ` Va dispărea și din biletul #${tk.no}.` : ''), { ok: 'Șterge', danger: true }))) return;
+  mutate(st => BC.deletePick(st, id));
+  toast('Selecție ștearsă', { action: 'undo', label: 'Anulează' });
+}
+async function deleteShown() {
+  const list = filteredPicks().filter(p => { const t = p.ticket && state.tickets.find(x => x.id === p.ticket); return !(t && t.archived); });
+  if (!list.length) return;
+  if (!(await confirmBox(`Ștergi cele <b>${list.length}</b> selecții afișate?`, { ok: 'Șterge', danger: true }))) return;
+  const ids = new Set(list.map(p => p.id));
+  mutate(st => { st.picks = st.picks.filter(p => !ids.has(p.id)); BC.dropEmptyTickets(st); });
+  toast(`Șterse ${list.length} selecții`, { action: 'undo', label: 'Anulează' });
+}
+
+// ---------------------------------------------------------------- adăugare la bilet
+function addPicksToTickets(ids) {
+  let created = 0;
+  const before = state.picks.filter(p => !p.ticket && ids.includes(p.id)).length;
+  if (!before) { toast('Nimic de adăugat: selecțiile sunt deja în bilete.', { err: true }); return; }
+  mutate(st => { created = BC.addToTickets(st, ids, st.settings.type, st.settings.n, st.settings.stake); });
+  ui.sel.clear(); renderOferta();
+  toast(`${before} selecții → ${created} ${created === 1 ? 'bilet nou' : 'bilete noi'}`, { action: 'gotoBilet', label: 'Vezi biletul', ms: 5000 });
+}
+
+// ---------------------------------------------------------------- date demonstrative
+function demoRaw() {
+  const rng = BC.mulberry32(2);
+  const names = ['Alfa', 'Beta', 'Gama', 'Delta', 'Sigma', 'Omega', 'Zeta', 'Kappa', 'Lambda', 'Theta', 'Iota', 'Rho', 'Tau', 'Phi', 'Psi', 'Eta', 'Nu', 'Xi'];
+  const leagues = ['Liga Demo A', 'Liga Demo B', 'Cupa Demo'], mods = ['R1', 'R2', 'T1', 'T2', 'CTRL'];
+  const mk = [['2+', 1.22, 1.45], ['3+', 1.55, 2.05], ['GG', 1.6, 2.0], ['1X', 1.18, 1.5]];
+  const today = BC.today(), yest = shiftDate(today, -1), out = [];
+  let code = 1100;
+  for (let d = 0; d < 2; d++) for (let i = 0; i < 18; i++) {
+    const [market, lo, hi] = mk[Math.floor(rng() * mk.length)];
+    const odds = Math.round((lo + rng() * (hi - lo)) * 100) / 100;
+    const res = d === 0 ? (rng() < 1 / (odds * 1.04) ? 'win' : 'loss') : 'pending';
+    out.push({ date: d === 0 ? yest : today, time: (12 + Math.floor(rng() * 8)) + ':' + (rng() < 0.5 ? '00' : '30'), code: String(code++),
+      home: names[(i * 2 + d) % 18] + (i % 2 ? ' City' : ' United'), away: names[(i * 2 + d + 5) % 18] + (i % 3 ? ' Town' : ' Rovers'),
+      league: leagues[i % 3], module: mods[i % mods.length], market, odds: i % 7 === 3 ? '' : odds, res, demo: true });
+  }
+  return out;
+}
+function loadDemo() {
+  if (state.picks.some(p => p.demo)) { toast('Datele demo sunt deja încărcate'); return; }
+  mutate(st => {
+    const added = [];
+    for (const raw of demoRaw()) { const p = BC.makePick(raw, 'p' + st.seq.pick++, BC.today()); st.picks.push(p); added.push(p.id); }
+    BC.addToTickets(st, added, 'n', 3, st.settings.stake);
+  });
+  closeModal(); showTab('bilet');
+  toast('Am încărcat un exemplu: 36 de selecții în 12 bilete');
+}
+function removeDemo() {
+  const n = state.picks.filter(p => p.demo).length; if (!n) return;
+  mutate(st => { st.picks = st.picks.filter(p => !p.demo); BC.dropEmptyTickets(st); });
+  closeModal(); toast(`Am șters ${n} selecții demo`);
+}
+
+// ================================================================== BILET
+function summaryHTML(s) {
+  if (!s.tickets) return '<span class="muted">Niciun bilet încă.</span>';
+  const settled = s.won + s.lost;
+  return `<b>${s.tickets} ${s.tickets === 1 ? 'bilet' : 'bilete'}</b> · ${s.legs} meciuri · rulaj ${fm(s.turnover)} · câștig potențial total ${fm(s.potential)}` +
+    `<span class="sep">|</span><span class="g">${s.won} câștigate</span> · <span class="r">${s.lost} ${s.lost === 1 ? 'pierdut' : 'pierdute'}</span> · ${s.pending} în așteptare` +
+    (s.voided ? ` · ${s.voided} anulate` : '') +
+    ` · reușită <b>${pc(s.hit)}</b> · profit <b class="${s.profit > 0 ? 'g' : s.profit < 0 ? 'r' : ''}">${fs(s.profit)}</b> · ROI <b class="${s.roi > 0 ? 'g' : s.roi < 0 ? 'r' : ''}">${pc(s.roi)}</b>` +
+    (settled > 0 && settled < 30 ? ` <span class="badge warn" title="Reușita și ROI-ul se bazează pe puține bilete încheiate">doar ${settled} bilete încheiate: eșantion mic</span>` : '');
+}
+function theadHTML(t, c) {
+  const odds = c.hasOdds ? `<b>${fm(c.odds)}</b>${c.missing ? ` <span class="faint">(${c.missing} fără cotă)</span>` : ''}` : '<span class="faint">fără cote</span>';
+  const prof = c.profit == null ? '' : `<span class="profit ${c.profit > 0 ? 'pos' : c.profit < 0 ? 'neg' : ''}">profit ${fs(c.profit)}</span>`;
+  return `<div class="th-main"><b class="tno">Bilet #${t.no}</b><span class="m">${esc(fdate(t.date))} · ${c.legs} ${c.legs === 1 ? 'meci' : 'meciuri'} · cotă ${odds} · miză ` +
+    `<button class="stake-btn" data-act="stake" data-id="${esc(t.id)}" title="Schimbă miza acestui bilet">${fm(t.stake)}</button> · câștig potențial <b>${fm(c.potential)}</b></span>` +
+    `<span class="st st-${c.status}">${statusLabel[c.status]}</span>${prof}${t.archived ? ' <span class="badge">arhivat</span>' : ''}</div>` +
+    `<div class="th-actions"><button class="btn small" data-act="copyTicket" data-id="${esc(t.id)}" title="Copiază biletul ca text">${ICON('copy')} Copiază</button>` +
+    (c.status === 'pending' ? `<button class="btn small" data-act="allWin" data-id="${esc(t.id)}" title="Marchează toate selecțiile rămase ca WIN">${ICON('check')} Toate WIN</button>` : '') +
+    `<button class="btn small" data-act="delTicket" data-id="${esc(t.id)}" title="Desface biletul (selecțiile rămân în Ofertă)">${ICON('trash')}</button></div>`;
+}
+function legHTML(p) {
+  return `<div class="tr leg" data-id="${esc(p.id)}">
+    <div class="c-match">${esc(BC.matchText(p))}</div>
+    <div class="meta"><span class="c-time">${esc(p.time || '–')}</span><span class="c-code">${esc(p.code)}</span><span class="c-league">${esc(p.league)}</span>` +
+    `<span class="c-mod">${modBadge(p.module)}</span><span class="c-mkt">${mktBadge(p.market)}</span></div>
+    <div class="c-odds"><input class="odds" data-id="${esc(p.id)}" value="${p.odds ? fm(p.odds) : ''}" placeholder="cotă" inputmode="decimal" aria-label="Cotă"></div>
+    <div class="c-res">${resButtons(p)}</div>
+    <div class="c-x"><button class="x" data-act="unticket" data-id="${esc(p.id)}" title="Scoate din bilet (rămâne în Ofertă)">×</button></div>
+  </div>`;
+}
+function ticketHTML(t, c) {
+  const legs = BC.legsOf(state, t.id);
+  return `<div class="ticket${t.archived ? ' arch' : ''}" data-t="${esc(t.id)}"><div class="thead">${theadHTML(t, c)}</div>
+    <div class="tbl legs">${legs.map(legHTML).join('')}</div></div>`;
+}
+const LEG_HEAD = '<div class="card" style="padding:0;margin-bottom:12px"><div class="tr th leg"><div class="c-time">Ora</div><div class="c-code">Cod</div><div class="c-match">Meci</div><div class="c-league">Campionat</div>' +
+  '<div class="c-mod">Modul</div><div class="c-mkt">Piață</div><div class="c-odds" style="text-align:right">Cotă</div><div class="c-res">Rezultat</div><div class="c-x"></div></div></div>';
+
+function viewTickets() { return state.tickets.filter(t => ui.viewAll || !t.archived).sort((a, b) => a.no - b.no); }
+function renderBilet() {
+  const s = state.settings;
+  if (document.activeElement !== $('#stake')) $('#stake').value = fm(s.stake);
+  $('#gType').value = s.type;
+  $('#nWrap').classList.toggle('hidden', s.type === 'all' || s.type === 'single');
+  $('#nLabel').textContent = s.type === 'n' ? 'meciuri / bilet' : 'max. meciuri / bilet (0 = fără limită)';
+  if (document.activeElement !== $('#gN')) $('#gN').value = s.n;
+  $('#viewAll').checked = ui.viewAll;
+  const rows = BC.calcAll(state, viewTickets());
+  refreshSummary(rows);
+  $('#ticketList').innerHTML = rows.length
+    ? LEG_HEAD.replace('<div class="card"', '<div class="card hide-m"') + rows.map(({ t, c }) => ticketHTML(t, c)).join('')
+    : `<div class="card">${emptyBox('Niciun bilet activ', 'Mergi la „Ofertă”, alege selecțiile și apasă „Adaugă la bilet”.',
+        '<button class="btn primary" data-act="gotoOferta">Mergi la Ofertă</button>')}</div>`;
+}
+function refreshSummary(rows) {
+  rows = rows || BC.calcAll(state, viewTickets());
+  $('#biletSummary').innerHTML = summaryHTML(rows.length ? BC.summarize(rows) : {});
+}
+function refreshTicketHeader(tid) {
+  const t = state.tickets.find(x => x.id === tid), box = $(`.ticket[data-t="${tid}"] .thead`);
+  if (!t || !box) return;
+  box.innerHTML = theadHTML(t, BC.ticketCalc(t, BC.legsOf(state, tid)));
+}
+function setRes(id, v) {
+  const p = state.picks.find(x => x.id === id); if (!p) return;
+  snap(); p.res = p.res === v ? 'pending' : v; save();
+  if (ui.tab === 'oferta') { renderOferta(); return; }
+  const row = $(`.leg[data-id="${id}"] .c-res`);
+  if (row) row.innerHTML = resButtons(p);
+  if (p.ticket) refreshTicketHeader(p.ticket);
+  refreshSummary(); renderHeader();
+}
+function onOddsChange(input) {
+  const p = state.picks.find(x => x.id === input.dataset.id); if (!p) return;
+  const raw = input.value.trim(), v = raw === '' ? null : BC.parseOdds(raw);
+  if (raw !== '' && v == null) { input.classList.add('bad'); toast('Cotă invalidă (trebuie să fie > 1,00)', { err: true }); return; }
+  input.classList.remove('bad');
+  if (v === p.odds) { input.value = v ? fm(v) : ''; return; }
+  snap(); p.odds = v; input.value = v ? fm(v) : ''; save();
+  if (ui.tab === 'bilet') { if (p.ticket) refreshTicketHeader(p.ticket); refreshSummary(); }
+}
+function ticketText(t) {
+  const c = BC.ticketCalc(t, BC.legsOf(state, t.id));
+  const lines = BC.legsOf(state, t.id).map((p, i) => `${i + 1}. ${p.time ? p.time + ' ' : ''}${p.code ? '[' + p.code + '] ' : ''}${BC.matchText(p)}${p.league ? ' · ' + p.league : ''} · ${p.market || '?'}${p.odds ? ' @ ' + fm(p.odds) : ''}`);
+  return `Bilet #${t.no} · ${c.hasOdds ? 'cotă ' + fm(c.odds) + ' · ' : ''}miză ${fm(t.stake)} · câștig potențial ${fm(c.potential)}\n` + lines.join('\n');
+}
+function editStake(tid) {
+  const t = state.tickets.find(x => x.id === tid); if (!t) return;
+  openModal(`<h3>Miza biletului #${t.no}</h3><div class="form-grid"><label>Miză <input id="stakeInp" value="${fm(t.stake)}" inputmode="decimal"></label></div>
+    <p class="small">Miza se schimbă doar pentru acest bilet; o schimbare a mizei generale nu îl mai atinge.</p>
+    <div class="row end"><button class="btn" data-act="closeModal">Anulează</button><button class="btn primary" data-act="saveStake" data-id="${esc(t.id)}">Salvează</button></div>`);
+}
+function saveStake(tid) {
+  const v = BC.parseNum($('#stakeInp').value);
+  if (!(v > 0)) { toast('Miză invalidă', { err: true }); return; }
+  mutate(st => { const t = st.tickets.find(x => x.id === tid); if (t) { t.stake = v; t.custom = true; } });
+  closeModal();
+}
+function setGlobalStake(v) {
+  mutate(st => {
+    st.settings.stake = v;
+    for (const t of st.tickets) if (!t.archived && !t.custom && BC.ticketCalc(t, BC.legsOf(st, t.id)).status === 'pending') t.stake = v;
+  });
+}
+function regroupNow(quiet) {
+  const act = state.tickets.filter(t => !t.archived).length;
+  if (!act) { if (!quiet) toast('Nu există bilete active de regrupat', { err: true }); return; }
+  let n = 0;
+  mutate(st => { n = BC.regroup(st, st.settings.type, st.settings.n, st.settings.stake); });
+  toast(`Biletul a fost refăcut: ${n} ${n === 1 ? 'bilet' : 'bilete'}`);
+}
+async function clearTickets() {
+  const act = state.tickets.filter(t => !t.archived);
+  if (!act.length) { toast('Nu există bilete active'); return; }
+  const pending = act.filter(t => BC.ticketCalc(t, BC.legsOf(state, t.id)).status === 'pending').length;
+  if (!(await confirmBox(`Golești biletul? Se desfac <b>${act.length}</b> bilete active` + (act.length - pending ? ` (din care <b>${act.length - pending}</b> încheiate: arhivează-le întâi dacă vrei să rămână în Jurnal)` : '') +
+    '. Selecțiile rămân în Ofertă, iar biletele arhivate nu se ating.', { ok: 'Golește', danger: true }))) return;
+  mutate(st => BC.clearActive(st));
+  toast('Biletul a fost golit', { action: 'undo', label: 'Anulează' });
+}
+function archiveNow() {
+  let k = 0;
+  mutate(st => { k = BC.archiveSettled(st); });
+  toast(k ? `Am arhivat ${k} bilete încheiate: le găsești în Jurnal & ROI` : 'Niciun bilet încheiat de arhivat', k ? {} : { err: true });
+}
+
+// ================================================================== JURNAL & ROI
+function periodRange() {
+  const p = ui.j.period, today = BC.today();
+  if (p === 'today') return { from: today, to: today };
+  if (p === '7') return { from: shiftDate(today, -6), to: today };
+  if (p === '30') return { from: shiftDate(today, -29), to: today };
+  if (p === 'month') return { from: today.slice(0, 8) + '01', to: today };
+  if (p === 'custom') return { from: ui.j.from || '0000-01-01', to: ui.j.to || '9999-12-31' };
+  return null;
+}
+const inRange = (d, r) => !r || (d >= r.from && d <= r.to);
+
+function lineChart(pts) {
+  const W = 640, H = 190, pl = 46, pr = 12, pt = 14, pb = 26;
+  const vals = pts.map(p => p.v), lo = Math.min(0, ...vals), hi = Math.max(0, ...vals), span = (hi - lo) || 1;
+  const x = i => pl + (pts.length === 1 ? (W - pl - pr) / 2 : i * (W - pl - pr) / (pts.length - 1));
+  const y = v => pt + (hi - v) * (H - pt - pb) / span;
+  const path = pts.map((p, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(p.v).toFixed(1)).join(' ');
+  const last = pts[pts.length - 1].v, col = last >= 0 ? '#34d399' : '#f87171';
+  const area = path + ` L${x(pts.length - 1).toFixed(1)} ${y(0).toFixed(1)} L${x(0).toFixed(1)} ${y(0).toFixed(1)} Z`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Profit cumulat pe zile">
+    <line x1="${pl}" y1="${y(0).toFixed(1)}" x2="${W - pr}" y2="${y(0).toFixed(1)}" stroke="#2d3b66" stroke-dasharray="4 4"/>
+    <path d="${area}" fill="${last >= 0 ? '#22c55e22' : '#f8717122'}"/><path d="${path}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round"/>
+    ${pts.map((p, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="3" fill="#0a0f1d" stroke="${p.v >= 0 ? '#34d399' : '#f87171'}" stroke-width="1.6"><title>${esc(p.label)}: ${fs(p.v)}</title></circle>`).join('')}
+    <text x="${pl - 6}" y="${(y(hi) + 4).toFixed(1)}" text-anchor="end">${fs(hi)}</text><text x="${pl - 6}" y="${(y(lo) + 4).toFixed(1)}" text-anchor="end">${fs(lo)}</text>
+    <text x="${pl}" y="${H - 6}">${esc(pts[0].label)}</text><text x="${W - pr}" y="${H - 6}" text-anchor="end">${esc(pts[pts.length - 1].label)}</text></svg>`;
+}
+const kpi = (label, value, sub, cls) => `<div class="kpi"><span>${label}</span><b class="${cls || ''}">${value}</b>${sub ? `<small>${sub}</small>` : ''}</div>`;
+const sgn = x => (x > 0 ? 'g' : x < 0 ? 'r' : '');
+
+function groupTable(title, keyFn, picks, margin) {
+  const m = new Map();
+  for (const p of picks) { const k = keyFn(p) || '—'; if (!m.has(k)) m.set(k, []); m.get(k).push(p); }
+  const rows = [...m.entries()].map(([k, g]) => ({ k, q: BC.quickStats(g, margin) })).sort((a, b) => b.q.n - a.q.n || b.q.total - a.q.total).slice(0, 25);
+  if (!rows.length) return '';
+  return `<div><h4>${title}</h4><div class="table-wrap"><table class="t"><thead><tr><th>${title.replace('Pe ', '')}</th><th>Sel.</th><th>WIN</th><th>LOST</th><th>Reușită</th><th>Cotă med.</th><th>ROI single</th></tr></thead><tbody>` +
+    rows.map(({ k, q }) => `<tr><td>${esc(k)}</td><td>${q.total}</td><td>${q.wins}</td><td>${q.losses}</td><td>${pc(q.hit)}</td><td>${fm(q.avgOdds)}</td><td class="${sgn(q.roi)}">${q.roi == null ? '–' : pc(q.roi)}</td></tr>`).join('') +
+    '</tbody></table></div></div>';
+}
+function renderJurnal() {
+  $('#jPeriod').value = ui.j.period;
+  $('#jFromW').classList.toggle('hidden', ui.j.period !== 'custom');
+  $('#jToW').classList.toggle('hidden', ui.j.period !== 'custom');
+  if (document.activeElement !== $('#jFrom')) $('#jFrom').value = ui.j.from;
+  if (document.activeElement !== $('#jTo')) $('#jTo').value = ui.j.to;
+  const r = periodRange(), margin = state.settings.margin;
+  const rows = BC.calcAll(state, state.tickets).filter(({ t }) => inRange(t.date, r)).sort((a, b) => a.t.date.localeCompare(b.t.date) || a.t.no - b.t.no);
+  const picks = state.picks.filter(p => inRange(p.date, r));
+  if (!rows.length && !picks.length) {
+    $('#jurnalBody').innerHTML = emptyBox('Jurnalul e gol pentru perioada aleasă', 'Aici apar toate biletele tale (active și arhivate), cu profit, ROI și clasamente pe modul, piață și campionat.');
+    return;
+  }
+  const s = BC.summarize(rows), settled = rows.filter(({ c }) => c.status === 'win' || c.status === 'loss');
+  // serii: cumul pe zile, drawdown, serie curentă
+  const byDay = new Map();
+  let cum = 0, peak = 0, maxDD = 0;
+  for (const { t, c } of rows) {
+    const d = byDay.get(t.date) || { date: t.date, n: 0, won: 0, lost: 0, pend: 0, stake: 0, profit: 0 };
+    d.n++;
+    if (c.status === 'win') d.won++; else if (c.status === 'loss') d.lost++; else if (c.status === 'pending') d.pend++;
+    if (c.status === 'win' || c.status === 'loss') { d.stake += t.stake; d.profit += c.profit; }
+    byDay.set(t.date, d);
+  }
+  for (const { c } of settled) { cum += c.profit; peak = Math.max(peak, cum); maxDD = Math.max(maxDD, peak - cum); }
+  let streak = 0, streakType = '';
+  for (let i = settled.length - 1; i >= 0; i--) { const st = settled[i].c.status; if (!streakType) streakType = st; if (st !== streakType) break; streak++; }
+  const days = [...byDay.values()].sort((a, b) => a.date.localeCompare(b.date));
+  let run = 0;
+  for (const d of days) { run += d.profit; d.cum = run; }
+  const odds = rows.filter(({ c }) => c.hasOdds).map(({ c }) => c.odds);
+  const q = BC.quickStats(picks, margin);
+
+  let h = `<div class="kpis">` +
+    kpi('Bilete', s.tickets, `${s.legs} meciuri · ${s.won} câștigate · ${s.lost} pierdute · ${s.pending} în așteptare`) +
+    kpi('Rulaj', fm(s.turnover), `miza biletelor încheiate: ${fm(s.settledStake)}`) +
+    kpi('Profit', fs(s.profit), '', sgn(s.profit)) + kpi('ROI', pc(s.roi), 'profit / miza încheiată', sgn(s.roi)) +
+    kpi('Reușită bilete', pc(s.hit), `${s.won} din ${s.won + s.lost} încheiate`) +
+    kpi('Cotă medie bilet', odds.length ? fm(BC.mean(odds)) : '–', '') +
+    kpi('Reușită selecții', pc(q.hit), `${q.wins} din ${q.n} selecții încheiate`) +
+    kpi('Scădere maximă', fm(maxDD), 'cea mai mare pierdere de la un vârf') +
+    kpi('Serie curentă', streak ? streak + (streakType === 'win' ? ' câștigate' : ' pierdute') : '–', '') + '</div>';
+  if (s.won + s.lost > 0 && s.won + s.lost < 30) h += `<div class="banner warn"><span>Doar <b>${s.won + s.lost}</b> bilete încheiate: reușita și ROI-ul arată mai mult norocul decât calitatea. Vezi fila <b>Test control</b>.</span></div>`;
+  const settledDays = days.filter(d => d.stake);
+  if (settledDays.length >= 2) h += `<h4>Profit cumulat pe zile</h4>${lineChart(settledDays.map(d => ({ label: fdateFull(d.date), v: d.cum })))}`;
+  else if (settledDays.length === 1) h += '<p class="hint">Graficul profitului cumulat apare după cel puțin două zile cu bilete încheiate.</p>';
+  h += `<h4 style="margin-top:14px">Pe zile</h4><div class="table-wrap"><table class="t"><thead><tr><th>Ziua</th><th>Bilete</th><th>WIN</th><th>LOST</th><th>În așteptare</th><th>Miză încheiată</th><th>Profit</th><th>ROI</th><th>Cumul</th></tr></thead><tbody>` +
+    days.slice().reverse().map(d => `<tr><td>${fdateFull(d.date)} <span class="faint">${dayName(d.date)}</span></td><td>${d.n}</td><td>${d.won}</td><td>${d.lost}</td><td>${d.pend}</td><td>${d.stake ? fm(d.stake) : '–'}</td>` +
+      `<td class="${sgn(d.profit)}">${d.stake ? fs(d.profit) : '–'}</td><td class="${sgn(d.profit)}">${d.stake ? pc(d.profit / d.stake) : '–'}</td><td class="${sgn(d.cum)}">${fs(d.cum)}</td></tr>`).join('') + '</tbody></table></div>';
+  h += `<p class="hint">Mai jos, <b>ROI single</b> = profitul dacă ai fi pariat fiecare selecție singură, cu miză egală (doar selecțiile cu cotă). Arată calitatea modulului, fără efectul combinării în bilete.</p>` +
+    `<div class="grid2">${groupTable('Pe modul', p => p.module, picks, margin)}${groupTable('Pe piață', p => p.market, picks, margin)}</div>` +
+    `<div style="margin-top:14px">${groupTable('Pe campionat', p => p.league, picks, margin)}</div>`;
+  const hist = rows.slice().reverse().slice(0, 150);
+  h += `<h4 style="margin-top:14px">Biletele${rows.length > 150 ? ' (ultimele 150)' : ''}</h4><div class="table-wrap"><table class="t"><thead><tr><th>Bilet</th><th>Ziua</th><th>Meciuri</th><th>Cotă</th><th>Miză</th><th>Status</th><th>Profit</th><th></th></tr></thead><tbody>` +
+    hist.map(({ t, c }) => `<tr><td>#${t.no}${t.archived ? ' <span class="badge">arhivat</span>' : ''}</td><td>${fdate(t.date)}</td><td>${c.legs}</td><td>${c.hasOdds ? fm(c.odds) : '–'}</td><td>${fm(t.stake)}</td>` +
+      `<td><span class="st st-${c.status}">${statusLabel[c.status]}</span></td><td class="${sgn(c.profit)}">${c.profit == null ? '–' : fs(c.profit)}</td>` +
+      `<td><button class="x" style="width:28px;height:28px" data-act="delTicket" data-id="${esc(t.id)}" title="Desface biletul">${ICON('trash')}</button></td></tr>`).join('') + '</tbody></table></div>';
+  $('#jurnalBody').innerHTML = h;
+}
+
+// ================================================================== TEST CONTROL
+const testCache = { key: '', res: null };
+function histChart(a) {
+  const W = 640, H = 160, pl = 12, pr = 12, pt = 16, pb = 24, h = a.hist, n = h.counts.length;
+  const mx = Math.max(...h.counts, 1), bw = (W - pl - pr) / n;
+  const xv = v => pl + (v - h.lo) / (h.hi - h.lo) * (W - pl - pr);
+  const ox = Math.min(W - pr, Math.max(pl, xv(a.profit)));
+  const bars = h.counts.map((c, i) => {
+    const bh = c / mx * (H - pt - pb), x0 = h.lo + i * (h.hi - h.lo) / n, ge = x0 + (h.hi - h.lo) / n / 2 >= a.profit - 1e-9;
+    return `<rect x="${(pl + i * bw + 1).toFixed(1)}" y="${(H - pb - bh).toFixed(1)}" width="${(bw - 2).toFixed(1)}" height="${bh.toFixed(1)}" rx="2" fill="${ge ? '#f5a52499' : '#3b4f8a'}"/>`;
+  }).join('');
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Distribuția profitului obținut doar din noroc">${bars}
+    <line x1="${ox.toFixed(1)}" y1="${pt - 4}" x2="${ox.toFixed(1)}" y2="${H - pb}" stroke="#34d399" stroke-width="2.4"/>
+    <text x="${Math.min(W - 60, Math.max(pl, ox - 28)).toFixed(1)}" y="${pt - 5}" style="fill:#34d399;font-weight:700">tu: ${fs(a.profit)}</text>
+    <text x="${pl}" y="${H - 8}">${fs(h.lo)}</text><text x="${W - pr}" y="${H - 8}" text-anchor="end">${fs(h.hi)}</text></svg>`;
+}
+function verdict(a) {
+  const n = a.nOdds;
+  if (!n) return { cls: 'neutral', t: 'Selecțiile încheiate nu au cote, deci nu pot calcula ce ar da norocul. Completează cotele (în Ofertă sau în Bilet).' };
+  if (n < 30) return { cls: 'neutral', t: `Eșantion prea mic (${n} selecții cu cotă). Chiar și un rezultat foarte bun poate fi simplu noroc. Strânge cel puțin 30, ideal peste 100, înainte să tragi concluzii.` };
+  const sig = (a.pHit < 0.05 ? 1 : 0) + (a.pProfit < 0.05 ? 1 : 0);
+  if (sig === 2) return { cls: 'good', t: `Rezultatele sunt mai bune decât ar da norocul, și la reușită (p = ${fp(a.pHit)}), și la profit (p = ${fp(a.pProfit)}). Merită urmărit mai departe, dar confirmă pe selecții noi, alese înainte să vezi rezultatele.` };
+  if (sig === 1) return { cls: 'neutral', t: `Semnal slab: un singur test iese sub 5% (reușită p = ${fp(a.pHit)}, profit p = ${fp(a.pProfit)}). Poate fi și noroc, mai ales dacă ai încercat mai multe module sau piețe.` };
+  if (a.pLow < 0.05 || a.pProfitLow < 0.05) return { cls: 'bad', t: `Rezultatele sunt mai slabe decât ar da norocul (șansa de „cel mult atâtea câștiguri” e ${fp(a.pLow)}). Verifică dacă cotele introduse sunt corecte.` };
+  return { cls: 'neutral', t: `Rezultatele sunt compatibile cu norocul: nu se poate spune că selecțiile bat piața (reușită p = ${fp(a.pHit)}, profit p = ${fp(a.pProfit)}).` };
+}
+function moduleRows(picks, margin) {
+  const mods = [...new Set(picks.map(p => p.module || '—'))];
+  const rows = mods.map(m => ({ m, q: BC.quickStats(picks.filter(p => (p.module || '—') === m), margin) })).filter(r => r.q.n > 0);
+  const ctrlName = String(state.settings.control || '').trim().toUpperCase();
+  const ctrl = rows.find(r => r.m === ctrlName);
+  const k = Math.max(1, rows.filter(r => r.q.nOdds >= 5).length);
+  return rows.sort((a, b) => b.q.n - a.q.n).map(r => ({
+    ...r, padj: r.q.pHit == null ? null : Math.min(1, r.q.pHit * k), k,
+    vsCtrl: ctrl && ctrl.m !== r.m && ctrl.q.n >= 5 ? BC.fisherExact(r.q.wins, r.q.losses, ctrl.q.wins, ctrl.q.losses).greater : null,
+    isCtrl: !!ctrl && ctrl.m === r.m,
+  }));
+}
+function renderTest() {
+  const mods = uniqVals('module'), mks = uniqVals('market'), lgs = uniqVals('league');
+  fillSelect($('#tModule'), mods, ui.t.module, 'toate'); ui.t.module = $('#tModule').value;
+  fillSelect($('#tMarket'), mks, ui.t.market, 'toate'); ui.t.market = $('#tMarket').value;
+  fillSelect($('#tLeague'), lgs, ui.t.league, 'toate'); ui.t.league = $('#tLeague').value;
+  if (document.activeElement !== $('#tMargin')) $('#tMargin').value = fm(state.settings.margin, 1);
+  const picks = state.picks.filter(p => (!ui.t.module || p.module === ui.t.module) && (!ui.t.market || p.market === ui.t.market) && (!ui.t.league || p.league === ui.t.league));
+  const settled = picks.filter(p => p.res === 'win' || p.res === 'loss');
+  const body = $('#testBody');
+  if (!settled.length) { body.innerHTML = emptyBox('Nu am încă rezultate de testat', 'Marchează selecțiile cu WIN / LOST (în Ofertă sau în Bilet) și completează cotele.'); return; }
+  const margin = state.settings.margin, nOdds = settled.filter(p => p.odds).length;
+  const sims = Math.max(4000, Math.min(20000, Math.floor(6e6 / Math.max(1, nOdds))));
+  const key = JSON.stringify([margin, picks.map(p => p.id + '|' + p.odds + '|' + p.res)]);
+  if (testCache.key !== key) { testCache.res = BC.analyzeLegs(picks, { margin, sims, seed: 20260925 }); testCache.key = key; }
+  const a = testCache.res, v = verdict(a);
+  let h = `<div class="kpis">` +
+    kpi('Selecții încheiate', a.n, `${a.wins} WIN · ${a.losses} LOST${a.pending ? ' · ' + a.pending + ' fără rezultat' : ''}`) +
+    kpi('Cu cotă (intră în test)', a.nOdds, a.n - a.nOdds ? `${a.n - a.nOdds} fără cotă sunt lăsate deoparte` : 'toate au cotă');
+  if (a.nOdds) {
+    h += kpi('Reușita ta', pc(a.owHit), `${a.owWins} din ${a.nOdds}`) +
+      kpi('Reușita „din cote”', pc(a.expHit), `cu marja ${fm(margin, 1)}% scoasă`) +
+      kpi('Șansa din noroc (reușită)', fp(a.pHit), `să iasă ≥ ${a.owWins} câștiguri din ${a.nOdds}`, a.pHit < 0.05 ? 'sig' : 'nosig') +
+      kpi('Profit (single, miză 1)', fs(a.profit), `ROI ${pc(a.roi)}` + (a.ci ? ` · interval 90%: ${pc(a.ci.lo)} … ${pc(a.ci.hi)}` : ''), sgn(a.profit)) +
+      kpi('Din noroc ai fi avut', fs(a.simMean), `de obicei între ${fs(a.simLo)} și ${fs(a.simHi)}`) +
+      kpi('Șansa din noroc (profit)', fp(a.pProfit), 'să iasă ≥ profitul tău', a.pProfit < 0.05 ? 'sig' : 'nosig');
+  }
+  h += '</div>';
+  h += `<div class="verdict ${v.cls}"><b>${{ good: 'Semnal pozitiv', bad: 'Sub așteptări', neutral: 'Concluzie' }[v.cls]}:</b> ${esc(v.t)}</div>`;
+  if (a.nOdds) {
+    h += `<h4>Unde cade rezultatul tău față de noroc</h4>${histChart(a)}<p class="hint" style="margin-top:2px">Profitul posibil doar din noroc, în unități de miză (${a.sims.toLocaleString('ro-RO')} simulări). Portocaliu = cel puțin cât al tău; linia verde = al tău.</p>` +
+      `<p class="hint"><b>Cum citești:</b> „șansa din noroc” (p) = probabilitatea ca <i>doar norocul</i>, cu cotele tale și marja casei, să dea cel puțin atât. Sub 5% = ieșit din comun; peste 5% = se poate explica prin noroc. ` +
+      `Pentru a vedea sigur un avantaj de <b>+5 puncte procentuale</b> față de cote ai nevoie de ~<b>${BC.sampleSizeForEdge(Math.min(0.9, a.expHit), 0.05)}</b> selecții cu cotă (ai ${a.nOdds}).</p>`;
+  }
+  if (!ui.t.module) {
+    const rows = moduleRows(picks, margin);
+    if (rows.length) {
+      const ctrl = rows.find(r => r.isCtrl);
+      h += `<h4 style="margin-top:14px">Pe module${rows[0].k > 1 ? ' (cu corecție pentru ' + rows[0].k + ' teste)' : ''}</h4><div class="table-wrap"><table class="t"><thead><tr><th>Modul</th><th>Selecții</th><th>WIN</th><th>Reușită</th><th>Din cote</th><th>p (noroc)</th><th>p corectat</th><th>ROI single</th>${ctrl ? '<th>p vs. control</th>' : ''}</tr></thead><tbody>` +
+        rows.map(r => `<tr><td>${modBadge(r.m === '—' ? '' : r.m)}${r.m === '—' ? '—' : ''}${r.isCtrl ? ' <span class="badge">control</span>' : ''}</td><td>${r.q.n}</td><td>${r.q.wins}</td><td>${pc(r.q.hit)}</td><td>${pc(r.q.expHit)}</td>` +
+          `<td class="pv ${r.q.pHit != null && r.q.pHit < 0.05 ? 'sig' : 'nosig'}">${fp(r.q.pHit)}</td><td class="pv ${r.padj != null && r.padj < 0.05 ? 'sig' : 'nosig'}">${fp(r.padj)}</td>` +
+          `<td class="${sgn(r.q.roi)}">${r.q.roi == null ? '–' : pc(r.q.roi)}</td>${ctrl ? `<td class="pv">${r.isCtrl ? '–' : fp(r.vsCtrl)}</td>` : ''}</tr>`).join('') + '</tbody></table></div>' +
+        `<p class="hint">Dacă testezi mai multe module, unul iese „norocos” doar din întâmplare; de aceea există coloana <b>p corectat</b> (Bonferroni). ` +
+        (ctrl ? `Modulul de control (<b>${esc(state.settings.control)}</b>) e comparat cu fiecare modul (test exact Fisher, unilateral).` : `Dacă adaugi selecții alese la întâmplare sub un modul numit <b>${esc(state.settings.control)}</b> (se schimbă în Setări), le compar cu celelalte module.`) + '</p>';
+    }
+  }
+  body.innerHTML = h;
+}
+
+// ================================================================== DATE, SETĂRI, EVENIMENTE, PORNIRE
+const csvCell = v => { const s = String(v == null ? '' : v); return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+const toCSV = rows => '\ufeff' + rows.map(r => r.map(csvCell).join(';')).join('\r\n');
+const stamp = () => BC.today();
+
+function settingsModal() {
+  const s = state.settings;
+  openModal(`<h3>Date și setări</h3>
+    <div class="form-grid">
+      <label>Miză implicită <input id="sStake" value="${fm(s.stake)}" inputmode="decimal"></label>
+      <label>Marja casei (%) <input id="sMargin" value="${fm(s.margin, 1)}" inputmode="decimal"></label>
+      <label>Modul de control <input id="sControl" value="${esc(s.control)}" placeholder="CTRL"></label>
+    </div>
+    <p class="small" style="margin-top:-6px">Marja se scoate din cote în Test control (o casă de pariuri ia de obicei 4–8%). Modulul de control = selecții alese la întâmplare, cu care se compară celelalte.</p>
+    <div class="row"><button class="btn primary" data-act="saveSettings">Salvează setările</button></div>
+    <h4 style="margin-top:18px">Copie de siguranță</h4>
+    <div class="row"><button class="btn" data-act="exportJson">${ICON('down')} Exportă tot (JSON)</button><button class="btn" data-act="importJson">Importă JSON…</button>
+      <button class="btn" data-act="exportPicks">Selecții (CSV)</button><button class="btn" data-act="exportTickets">Bilete (CSV)</button></div>
+    <h4 style="margin-top:18px">Date</h4>
+    <div class="row"><button class="btn" data-act="loadDemo">Încarcă exemplu demo</button><button class="btn" data-act="removeDemo">Șterge datele demo</button><button class="btn danger" data-act="wipeAll">Șterge TOATE datele</button></div>
+    <p class="small muted" style="margin-bottom:0">Datele rămân doar în acest browser; nu se trimit nicăieri. Fă din când în când o copie JSON, mai ales înainte să cureți datele browserului.</p>`, { wide: true });
+}
+function saveSettings() {
+  const stake = BC.parseNum($('#sStake').value), margin = BC.parseNum($('#sMargin').value);
+  if (!(stake > 0)) { toast('Miză invalidă', { err: true }); return; }
+  if (margin == null || margin < 0 || margin > 30) { toast('Marja trebuie să fie între 0 și 30%', { err: true }); return; }
+  mutate(st => { st.settings.stake = stake; st.settings.margin = margin; st.settings.control = BC.normModule($('#sControl').value) || 'CTRL'; });
+  closeModal(); toast('Setări salvate');
+}
+function exportJson() { download(`bilete-combinate-${stamp()}.json`, JSON.stringify(state, null, 1), 'application/json'); toast('Copia JSON a fost descărcată'); }
+function exportPicks() {
+  const rows = [['Data', 'Ora', 'Cod', 'Meci', 'Campionat', 'Modul', 'Piață', 'Cotă', 'Rezultat', 'Bilet']];
+  for (const p of state.picks.slice().sort(BC.cmpPick)) {
+    const t = p.ticket && state.tickets.find(x => x.id === p.ticket);
+    rows.push([p.date, p.time, p.code, BC.matchText(p), p.league, p.module, p.market, p.odds ? fm(p.odds) : '', { pending: '', win: 'WIN', loss: 'LOST', void: 'ANULAT' }[p.res], t ? '#' + t.no : '']);
+  }
+  download(`selectii-${stamp()}.csv`, toCSV(rows), 'text/csv;charset=utf-8');
+}
+function exportTickets() {
+  const rows = [['Bilet', 'Data', 'Meciuri', 'Cotă', 'Miză', 'Câștig potențial', 'Status', 'Profit', 'Arhivat']];
+  for (const { t, c } of BC.calcAll(state, state.tickets.slice().sort((a, b) => a.no - b.no)))
+    rows.push(['#' + t.no, t.date, c.legs, c.hasOdds ? fm(c.odds) : '', fm(t.stake), fm(c.potential), statusLabel[c.status], c.profit == null ? '' : fm(c.profit), t.archived ? 'da' : '']);
+  download(`bilete-${stamp()}.csv`, toCSV(rows), 'text/csv;charset=utf-8');
+}
+async function wipeAll() {
+  if (!(await confirmBox('Ștergi <b>toate</b> selecțiile și biletele? (Poți anula imediat din butonul de anulare.)', { ok: 'Șterge tot', danger: true }))) return;
+  mutate(st => { const d = BC.defaultState(); st.picks = []; st.tickets = []; st.seq = d.seq; });
+  ui.sel.clear(); toast('Toate datele au fost șterse', { action: 'undo', label: 'Anulează' });
+}
+function setGrouping(type, n) {
+  const had = state.tickets.some(t => !t.archived);
+  n = Math.max(type === 'n' ? 1 : 0, Math.floor(n) || 0);
+  let k = 0;
+  mutate(st => { st.settings.type = type; st.settings.n = n; if (had) k = BC.regroup(st, type, n, st.settings.stake); });
+  if (had) toast(`Biletul a fost refăcut: ${k} ${k === 1 ? 'bilet' : 'bilete'}`);
+}
+function gotoTicket(tid) {
+  const t = state.tickets.find(x => x.id === tid); if (!t) return;
+  if (t.archived) ui.viewAll = true;
+  showTab('bilet');
+  const el = $(`.ticket[data-t="${tid}"]`);
+  if (el) { el.scrollIntoView({ block: 'center' }); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1600); }
+}
+
+const actions = {
+  undo, settings: settingsModal, saveSettings, closeModal: () => closeModal(), modalOk: () => closeModal('ok'),
+  res: el => setRes(el.dataset.id, el.dataset.v),
+  unticket: el => mutate(st => BC.removeFromTicket(st, el.dataset.id)),
+  delPick: el => deletePick(el.dataset.id), editPick: el => editPickModal(el.dataset.id), savePick: savePickFromModal,
+  gotoTicket: el => gotoTicket(el.dataset.id), gotoBilet: () => showTab('bilet'), gotoOferta: () => showTab('oferta'),
+  regroup: () => regroupNow(), clearTickets, archive: archiveNow,
+  stake: el => editStake(el.dataset.id), saveStake: el => saveStake(el.dataset.id),
+  copyTicket: el => { const t = state.tickets.find(x => x.id === el.dataset.id); if (t) copyText(ticketText(t)).then(() => toast('Biletul a fost copiat'), () => toast('Nu am putut copia', { err: true })); },
+  allWin: el => mutate(st => { for (const p of BC.legsOf(st, el.dataset.id)) if (p.res === 'pending') p.res = 'win'; }),
+  delTicket: async el => {
+    const t = state.tickets.find(x => x.id === el.dataset.id); if (!t) return;
+    if (!(await confirmBox(`Desfaci biletul <b>#${t.no}</b>? Selecțiile rămân în Ofertă (cu rezultatele lor), dar biletul dispare din bilete și din Jurnal.`, { ok: 'Desfă biletul', danger: true }))) return;
+    mutate(st => BC.deleteTicket(st, t.id)); toast('Bilet desfăcut', { action: 'undo', label: 'Anulează' });
+  },
+  doImport, cancelImport: () => { ui.parsed = null; renderImportPreview(); },
+  addFree: () => addPicksToTickets(filteredPicks().filter(p => !p.ticket).map(p => p.id)),
+  addSel: () => addPicksToTickets([...ui.sel]),
+  selAll: () => { filteredPicks().filter(p => !p.ticket).forEach(p => ui.sel.add(p.id)); renderOferta(); },
+  selNone: () => { ui.sel.clear(); renderOferta(); },
+  delShown: deleteShown,
+  resetFilters: () => { ui.f = { q: '', date: '', league: '', module: '', market: '', status: 'all' }; renderOferta(); },
+  loadDemo, removeDemo, exportJson, exportPicks, exportTickets, wipeAll, importJson: () => $('#fileImport').click(),
+};
+
+document.addEventListener('click', e => {
+  if (e.target.id === 'modal') { closeModal(); return; }
+  const tab = e.target.closest('[data-tab]');
+  if (tab) { showTab(tab.dataset.tab); return; }
+  const el = e.target.closest('[data-act]');
+  if (el && actions[el.dataset.act]) { e.preventDefault(); actions[el.dataset.act](el, e); }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.matches('input.odds')) { onOddsChange(t); return; }
+  if (t.matches('input.sel')) { t.checked ? ui.sel.add(t.dataset.id) : ui.sel.delete(t.dataset.id); renderOferta(); return; }
+  if (t.dataset && t.dataset.role != null && ui.parsed) { ui.parsed.roles[+t.dataset.role] = t.value; renderImportPreview(); return; }
+  switch (t.id) {
+    case 'fDate': ui.f.date = t.value; renderOferta(); break;
+    case 'fLeague': ui.f.league = t.value; renderOferta(); break;
+    case 'fModule': ui.f.module = t.value; renderOferta(); break;
+    case 'fMarket': ui.f.market = t.value; renderOferta(); break;
+    case 'fStatus': ui.f.status = t.value; renderOferta(); break;
+    case 'stake': { const v = BC.parseNum(t.value); if (v > 0) setGlobalStake(v); else { toast('Miză invalidă', { err: true }); renderBilet(); } break; }
+    case 'gType': setGrouping(t.value, state.settings.n || 3); break;
+    case 'gN': { const v = BC.parseNum(t.value); setGrouping(state.settings.type, v == null ? 3 : v); break; }
+    case 'viewAll': ui.viewAll = t.checked; renderBilet(); break;
+    case 'jPeriod': ui.j.period = t.value; renderJurnal(); break;
+    case 'jFrom': ui.j.from = t.value; renderJurnal(); break;
+    case 'jTo': ui.j.to = t.value; renderJurnal(); break;
+    case 'tModule': ui.t.module = t.value; renderTest(); break;
+    case 'tMarket': ui.t.market = t.value; renderTest(); break;
+    case 'tLeague': ui.t.league = t.value; renderTest(); break;
+    case 'tMargin': { const v = BC.parseNum(t.value); if (v == null || v < 0 || v > 30) { toast('Marja trebuie să fie între 0 și 30%', { err: true }); renderTest(); } else mutate(st => { st.settings.margin = v; }); break; }
+    case 'fileImport': importFile(t); break;
+  }
+});
+document.addEventListener('input', e => { if (e.target.id === 'fQ') { ui.f.q = e.target.value; renderOferta(); } });
+document.addEventListener('submit', e => { if (e.target.id === 'addForm') { e.preventDefault(); submitAddForm(e.target); } });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('#modal').classList.contains('hidden')) closeModal();
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '')) { e.preventDefault(); undo(); }
+  if (e.key === 'Enter' && e.target.matches && e.target.matches('input.odds')) e.target.blur();
+});
+async function importFile(input) {
+  const f = input.files && input.files[0]; input.value = '';
+  if (!f) return;
+  try {
+    const st = BC.sanitizeState(JSON.parse(await f.text()));
+    if (!(await confirmBox(`Înlocuiești datele curente cu cele din fișier (<b>${st.picks.length}</b> selecții, <b>${st.tickets.length}</b> bilete)?`, { ok: 'Înlocuiește', danger: true }))) return;
+    mutate(s => { s.settings = st.settings; s.picks = st.picks; s.tickets = st.tickets; s.seq = st.seq; });
+    closeModal(); toast('Datele au fost importate');
+  } catch (err) { toast('Fișier invalid: nu e o copie JSON a programului', { err: true }); }
+}
+$('#btnParse').addEventListener('click', doParse);
+$('#pasteBox').addEventListener('paste', () => setTimeout(doParse, 0));
+$('#addCard summary').addEventListener('click', () => { $('#addCard').dataset.touched = '1'; });
+$('#biletHint').open = window.innerWidth > 760;
+
+// ---------------------------------------------------------------- pornire
+state = loadState();
+{
+  const t = state.settings.tab;
+  ui.tab = ['oferta', 'bilet', 'jurnal', 'test'].includes(t) ? t : (state.picks.length ? 'bilet' : 'oferta');
+  showTab(ui.tab);
+}
+window.__bc = { get state() { return state; }, ui, BC };   // pentru teste
+
+})();
+
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+
+</script>
+</body>
+</html>
